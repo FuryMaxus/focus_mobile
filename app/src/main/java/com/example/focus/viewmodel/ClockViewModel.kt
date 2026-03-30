@@ -78,7 +78,11 @@ class ClockViewModel: ViewModel() {
         timerJob?.cancel()
         timerJob = null
         _state.update {
-            it.copy(isRunning = false)
+            it.copy(
+                isRunning = false,
+                timeInSeconds = 0L
+            )
+
         }
     }
 
