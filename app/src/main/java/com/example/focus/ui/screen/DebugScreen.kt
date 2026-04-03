@@ -19,6 +19,8 @@ import androidx.compose.ui.unit.dp
 fun DebugScreen(
     onTimerButtonClick: () -> Unit
 ) {
+    val txtScreenTitle: String = "Menu de Debug"
+    val txtBtnGotoTimer: String = "reloj focus"
 
     Column(
         modifier = Modifier
@@ -27,9 +29,11 @@ fun DebugScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text("Menu de Debug")
+        Text(txtScreenTitle)
         Spacer(modifier = Modifier.height(10.dp))
-        Button(onClick = onTimerButtonClick) { Text("reloj focus") }
+        Button(onClick = onTimerButtonClick) {
+            Text(txtBtnGotoTimer)
+        }
         // the modules will go here for now, put the rest when they are ready
     }
 }

@@ -28,6 +28,11 @@ fun ClockScreen(
 ) {
     val state by clockViewModel.state.collectAsStateWithLifecycle()
 
+    val txtBtnStartStopwatch: String = "Aventura (modo normal)"
+    val txtBtnStartTimer: String = "Aventura a Contrareloj"
+    val txtBtnReturn: String = "Regresar"
+    val txtLblMinutesInput: String = "Minutos"
+
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -41,7 +46,7 @@ fun ClockScreen(
 
         if (!state.isRunning) {
             Button(onClick = {clockViewModel.startStopwatch()}) {
-                Text("Aventura (modo normal)")
+                Text(txtBtnStartStopwatch)
             }
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -50,19 +55,18 @@ fun ClockScreen(
                 OutlinedTextField(
                     value = state.inputMinutes,
                     onValueChange = { clockViewModel.onInputChanged(it) },
-                    label = { Text("Minutos") },
+                    label = { Text(txtLblMinutesInput) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier.width(100.dp)
                 )
                 Button(onClick = { clockViewModel.startTimer() }) {
-                    Text("Aventura a Contrareloj")
+                    Text(txtBtnStartTimer)
                 }
             }
         } else {
             Button(onClick = { clockViewModel.stopClock() }) {
-                Text("Regresar")
+                Text(txtBtnReturn)
             }
         }
-
     }
 }
