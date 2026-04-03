@@ -23,7 +23,7 @@ class ClockViewModel: ViewModel() {
         }
     }
 
-    fun startStopwatch(){
+    fun startStopwatch() {
         if (_state.value.isRunning) return
 
         _state.update {
@@ -52,7 +52,7 @@ class ClockViewModel: ViewModel() {
 
         if (minutes <= 0) return
 
-        val totalSeconds = (minutes * 60).toLong()
+        val totalSeconds = minutes.toLong() * 60
         _state.update {
             it.copy(
                 isRunning = true,
@@ -68,13 +68,21 @@ class ClockViewModel: ViewModel() {
                     it.copy(timeInSeconds = it.timeInSeconds - 1)
                 }
             }
-            stopClock()
-            onTimerFinished()
-
+            _state.update {
+                it.copy(isRunning = false, timeInSeconds = 0L)
+            }
+            timerJob = null
+            onTimerFinished(totalSeconds)
         }
     }
 
     fun stopClock() {
+        val currentState = _state.value
+
+        if (currentState.isRunning && !currentState.isCountdown) {
+            onTimerFinished(currentState.timeInSeconds)
+        }
+
         timerJob?.cancel()
         timerJob = null
         _state.update {
@@ -82,11 +90,10 @@ class ClockViewModel: ViewModel() {
                 isRunning = false,
                 timeInSeconds = 0L
             )
-
         }
     }
 
-    private fun onTimerFinished() {
+    private fun onTimerFinished(secondsEarned: Long) {
        //Here goes what happen after the clock business ends, like the rewards and such
         //we have to work on this when the users stuff are ready
     }
