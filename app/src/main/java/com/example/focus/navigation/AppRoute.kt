@@ -1,5 +1,14 @@
 package com.example.focus.navigation
 
-sealed class AppRoute(val route: String) {
-    data object Home: AppRoute("home")
+import kotlinx.serialization.Serializable
+
+sealed interface AppRoute {
+    @Serializable
+    data object Home : AppRoute
+
+    @Serializable
+    data object Debug : AppRoute
+
+    @Serializable
+    data object Clock : AppRoute
 }

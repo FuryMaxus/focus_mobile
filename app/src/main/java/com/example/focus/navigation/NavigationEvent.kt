@@ -1,13 +1,13 @@
 package com.example.focus.navigation
 
-sealed class NavigationEvent{
+sealed class NavigationEvent {
     data class NavigateTo(
-        val appRoute: AppRoute,
-        val popRoute: AppRoute ?= null,
+        val destination: Any,
+        val popUpTo: Any? = null,
         val inclusive: Boolean = false,
-        val singleTop: Boolean = false,
-        val args: Map<String, String>? = null
-    ): NavigationEvent()
-    object PopBackStack: NavigationEvent()
-    object NavigateUp: NavigationEvent()
+        val singleTop: Boolean = false
+    ) : NavigationEvent()
+
+    data object PopBackStack : NavigationEvent()
+    data object NavigateUp : NavigationEvent()
 }
