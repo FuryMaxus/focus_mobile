@@ -64,4 +64,14 @@ dependencies {
     implementation(libs.androidx.room.runtime)
     annotationProcessor(libs.androidx.room.compiler)
     implementation(libs.kotlinx.serialization.json)
+    
+    // DataStore para guardar el Token
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
+    
+    // Ktor para Backend (Manual para evitar errores de catálogo)
+    val ktor_version = "3.0.1"
+    implementation("io.ktor:ktor-client-core:$ktor_version")
+    implementation("io.ktor:ktor-client-okhttp:$ktor_version")
+    implementation("io.ktor:ktor-client-content-negotiation:$ktor_version")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:$ktor_version")
 }
