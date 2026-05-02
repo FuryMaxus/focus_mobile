@@ -1,8 +1,17 @@
 package com.example.focus.ui.screen
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -15,8 +24,7 @@ import com.example.focus.viewmodel.ClockViewModel
 
 @Composable
 fun ClockScreen(
-    clockViewModel: ClockViewModel = viewModel(),
-    onBack: () -> Unit
+    clockViewModel: ClockViewModel = viewModel()
 ) {
     val state by clockViewModel.state.collectAsStateWithLifecycle()
 
@@ -30,17 +38,6 @@ fun ClockScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        // Botón para volver (Visible solo si no está corriendo el reloj)
-        if (!state.isRunning) {
-            Button(
-                onClick = onBack,
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant, contentColor = MaterialTheme.colorScheme.onSurfaceVariant),
-                modifier = Modifier.padding(bottom = 20.dp)
-            ) {
-                Text("← Volver a Debug")
-            }
-        }
-
         Text(
             text = state.formattedTime,
             style = MaterialTheme.typography.displayLarge

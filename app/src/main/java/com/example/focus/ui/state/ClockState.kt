@@ -11,15 +11,8 @@ data class ClockState(
     val formattedTime: String
         @SuppressLint("DefaultLocale")
         get() {
-            val days = timeInSeconds / 86400
-            val hours = (timeInSeconds % 86400) / 3600
-            val minutes = (timeInSeconds % 3600) / 60
+            val minutes = timeInSeconds / 60
             val seconds = timeInSeconds % 60
-
-            return when {
-                days > 0 -> String.format("%dd %02dh %02dm", days, hours, minutes)
-                hours > 0 -> String.format("%02d:%02d:%02d", hours, minutes, seconds)
-                else -> String.format("%02d:%02d", minutes, seconds)
-            }
+            return String.format("%02d:%02d", minutes, seconds)
         }
 }
