@@ -1,66 +1,90 @@
 package com.example.focus.ui
 
-
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.focus.navigation.AppRoute
-import com.example.focus.navigation.NavigationEvent
+
+// Imports de tus pantallas
+import com.example.focus.ui.screen.LoginScreen
+import com.example.focus.ui.screen.RegisterScreen
+import com.example.focus.ui.screen.HomeScreen
 import com.example.focus.ui.screen.ClockScreen
-import com.example.focus.ui.screen.DebugScreen
-import com.example.focus.viewmodel.MainViewModel
+// import com.example.focus.ui.screen.ClockScreen // Descomenta esta línea cuando crees tu pantalla del reloj
 
-
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen() {
-    val context = LocalContext.current
+    // Esto controla en qué pantalla estamos actualmente
     val navController = rememberNavController()
-    val mainViewModel: MainViewModel = viewModel()
 
-    LaunchedEffect(Unit) {
-        mainViewModel.navEvents.collect { event ->
-            when (event) {
-                is NavigationEvent.NavigateTo -> {
-                    navController.navigate(event.destination) {
-                        launchSingleTop = event.singleTop
-                        restoreState = true
-                        event.popUpTo?.let { popTarget ->
-                            popUpTo(popTarget) {
-                                inclusive = event.inclusive
-                                saveState = true
-                            }
-                        }
-                    }
-                }
-                NavigationEvent.NavigateUp -> navController.navigateUp()
-                NavigationEvent.PopBackStack -> navController.popBackStack()
-            }
+    // NavHost es el contenedor que cambia las pantallas
+    NavHost(navController = navController, startDestination = "menu") {
+
+        // 1. Pantalla del Menú Principal
+        composable("menu") {
+            MenuScreen(
+                onNavigateToLogin = { navController.navigate("login") },
+                onNavigateToRegister = { navController.navigate("register") }
+            )
+        }
+
+        // 2. Pantalla de Iniciar Sesión (¡Ahora recibe el router para poder avanzar al Home!)
+        composable("login") {
+            LoginScreen(navController = navController)
+        }
+
+        // 3. Pantalla de Registro
+        composable("register") {
+            RegisterScreen()
+        }
+
+        // 4. NUEVA: Pantalla Principal (Dashboard/Home)
+        composable("home") {
+            HomeScreen(navController = navController)
+        }
+
+        // 5. NUEVA: Pantalla del Temporizador
+        composable("clock") {
+            ClockScreen(navController = navController)
+            // Aquí llamarás a tu ClockScreen cuando la tengas lista
+            // ClockScreen(navController = navController)
         }
     }
-    Scaffold { innerPadding ->
-        NavHost(
-            navController = navController,
-            startDestination = AppRoute.Debug, //change to home later
-            modifier = Modifier.padding(innerPadding)
-        ) {
-            composable<AppRoute.Home> {
-            }
-            composable<AppRoute.Debug> {
-                DebugScreen(onTimerButtonClick = { mainViewModel.navigateTo(AppRoute.Clock) })
-            }
-            composable<AppRoute.Clock> {
-                ClockScreen()
-            }
+}
 
+// El diseño visual de tu Menú de Inicio
+@Composable
+fun MenuScreen(onNavigateToLogin: () -> Unit, onNavigateToRegister: () -> Unit) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text("Bienvenido a Focus", style = MaterialTheme.typography.headlineLarge)
+
+        Spacer(modifier = Modifier.height(48.dp))
+
+        // Botón para ir al Login
+        Button(
+            onClick = onNavigateToLogin,
+            modifier = Modifier.fillMaxWidth(0.7f) // Ocupa el 70% del ancho de la pantalla
+        ) {
+            Text("Iniciar Sesión")
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Botón para ir al Registro
+        OutlinedButton(
+            onClick = onNavigateToRegister,
+            modifier = Modifier.fillMaxWidth(0.7f)
+        ) {
+            Text("Crear Cuenta")
         }
     }
 }

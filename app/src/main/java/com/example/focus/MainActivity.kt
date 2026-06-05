@@ -21,10 +21,12 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import com.example.focus.ui.MainScreen
+import com.example.focus.ui.screen.RegisterScreen
 import com.example.focus.ui.theme.FocusTheme
-
+import com.example.focus.network.RetrofitClient
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        RetrofitClient.initialize(this)
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
