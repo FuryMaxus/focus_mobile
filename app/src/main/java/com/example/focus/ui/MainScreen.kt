@@ -40,7 +40,7 @@ fun MainScreen() {
 
         // 3. Pantalla de Registro
         composable("register") {
-            RegisterScreen()
+            RegisterScreen(navController = navController)
         }
 
         // 4. NUEVA: Pantalla Principal (Dashboard/Home)

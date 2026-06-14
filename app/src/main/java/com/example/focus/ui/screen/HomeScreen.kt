@@ -1,6 +1,9 @@
 package com.example.focus.ui.screen
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.PlayArrow
@@ -8,110 +11,269 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.focus.network.TokenManager
-import kotlinx.coroutines.launch
+import com.example.focus.viewmodel.HomeViewModel
+import com.example.focus.viewmodel.HomeViewModelFactory
+import com.example.focus.ui.theme.*
+import com.example.focus.ui.OrnamentalDivider
 
+// ═══════════════════════════════════════════════════════════════
+//  HomeScreen — solo cambios visuales
+//  Toda la lógica del ViewModel permanece idéntica al original
+// ═══════════════════════════════════════════════════════════════
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(navController: NavController) {
+
+    // ── Lógica original intacta ─────────────────────────────────
     val context = LocalContext.current
     val tokenManager = remember { TokenManager(context) }
-    val scope = rememberCoroutineScope()
 
-    // Leemos las estadísticas en tiempo real desde nuestra memoria local
-    val nivel by tokenManager.getLevel.collectAsState(initial = 1)
-    val expActual by tokenManager.getExp.collectAsState(initial = 0)
+    val viewModel: HomeViewModel = viewModel(
+        factory = HomeViewModelFactory(tokenManager)
+    )
 
-    // Cálculo matemático del progreso
-    val expNecesaria = nivel * 100
-    val expFaltante = expNecesaria - expActual
-    val progreso = if (expNecesaria > 0) expActual.toFloat() / expNecesaria.toFloat() else 0f
+    val nivel      by viewModel.nivel.collectAsState()
+    val expActual  by viewModel.expActual.collectAsState()
+    val expFaltante by viewModel.expFaltante.collectAsState()
+    val progreso   by viewModel.progreso.collectAsState()
+    // ────────────────────────────────────────────────────────────
 
     Scaffold(
+        containerColor = DungeonNoir,
         topBar = {
             TopAppBar(
-                title = { Text("Mi Panel - Focus") },
+                title = {
+                    Column {
+                        Text(
+                            text = "FOCUS MOBILE",
+                            style = MaterialTheme.typography.titleLarge,
+                            color = AncientGold
+                        )
+                        Text(
+                            text = "Tablón de Misiones",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = SteelSilver500,
+                            letterSpacing = 1.sp
+                        )
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.primary,
+                    containerColor = DungeonNoir700
                 ),
                 actions = {
-                    IconButton(onClick = {
-                        scope.launch {
-                            tokenManager.clearAll() // Al salir borramos token y stats
-                            navController.navigate("menu") {
-                                popUpTo(0) { inclusive = true }
-                            }
+                    IconButton(
+                        onClick = {
+                            viewModel.logout(onLogoutSuccess = { // lógica intacta
+                                navController.navigate("menu") {
+                                    popUpTo(0) { inclusive = true }
+                                }
+                            })
                         }
-                    }) {
-                        Icon(Icons.AutoMirrored.Filled.ExitToApp, "Cerrar Sesión")
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ExitToApp,
+                            contentDescription = "Cerrar Sesión",
+                            tint = AmberFlame
+                        )
                     }
                 }
             )
         },
         floatingActionButton = {
             ExtendedFloatingActionButton(
-                onClick = { navController.navigate("clock") },
-                icon = { Icon(Icons.Filled.PlayArrow, "Iniciar Estudio") },
-                text = { Text("Iniciar Sesión de Estudio") }
+                onClick = { navController.navigate("clock") }, // lógica intacta
+                containerColor = AmberFlame,
+                contentColor   = InkBlack,
+                shape          = RoundedCornerShape(4.dp),
+                icon = {
+                    Icon(Icons.Filled.PlayArrow, contentDescription = "Iniciar Misión")
+                },
+                text = {
+                    Text(
+                        text = "INICIAR MISIÓN",
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+                },
+                elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 8.dp)
             )
         }
     ) { paddingValues ->
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(DungeonNoir700, DungeonNoir, InkBlack)
+                    )
+                )
                 .padding(paddingValues)
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                text = "¡Bienvenido de vuelta!",
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold
-            )
 
             Spacer(modifier = Modifier.height(8.dp))
-            Text(text = "¡Listo para enfocarte!", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.secondary)
-            Spacer(modifier = Modifier.height(24.dp))
 
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+            // ── Saludo / título de sección ──────────────────────
+            Text(
+                text = "¡Aventura a la vista!",
+                style = MaterialTheme.typography.headlineMedium,
+                color = AncientGold,
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "Prepara tu equipamiento, la mazmorra te aguarda.",
+                style = MaterialTheme.typography.bodyMedium.copy(fontStyle = FontStyle.Italic),
+                color = SteelSilver500,
+                textAlign = TextAlign.Center
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+            OrnamentalDivider()
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // ── Card de estadísticas ────────────────────────────
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(6.dp))
+                    .background(DungeonNoir700)
+                    .border(
+                        width = 1.dp,
+                        brush = Brush.linearGradient(
+                            colors = listOf(SaddleBrown, AncientGold700, SaddleBrown)
+                        ),
+                        shape = RoundedCornerShape(6.dp)
+                    )
             ) {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text("Tus Estadísticas", style = MaterialTheme.typography.titleLarge)
-                    Spacer(modifier = Modifier.height(16.dp))
+                Column(modifier = Modifier.padding(20.dp)) {
 
+                    // Header de la card
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(2.dp))
+                                .background(SaddleBrown700)
+                                .border(1.dp, SaddleBrown, RoundedCornerShape(2.dp))
+                                .padding(horizontal = 8.dp, vertical = 3.dp)
+                        ) {
+                            Text(
+                                text = "📜  PERGAMINO DE ESTADÍSTICAS",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = AncientGold,
+                                letterSpacing = 0.8.sp
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    // Stats row
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
-                        StatItem(label = "Nivel", value = "$nivel")
-                        StatItem(label = "XP Actual", value = "$expActual")
-                        StatItem(label = "Faltan", value = "$expFaltante")
+                        StatItem(label = "NIVEL",    value = "$nivel")      // lógica intacta
+                        StatItemDivider()
+                        StatItem(label = "XP ACTUAL",  value = "$expActual")
+                        StatItemDivider()
+                        StatItem(label = "FALTAN",   value = "$expFaltante")
                     }
 
                     Spacer(modifier = Modifier.height(24.dp))
 
-                    // Nuestra nueva barra visual
-                    LinearProgressIndicator(
-                        progress = { progreso },
-                        modifier = Modifier.fillMaxWidth().height(12.dp),
-                        color = MaterialTheme.colorScheme.primary,
-                        trackColor = MaterialTheme.colorScheme.primaryContainer,
+                    // Etiqueta de la barra
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = "Progreso al Nivel ${nivel + 1}",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = SteelSilver500
+                        )
+                        Text(
+                            text = "${(progreso * 100).toInt()}%",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = AncientGold,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // Barra de XP
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(14.dp)
+                            .clip(RoundedCornerShape(2.dp))
+                            .background(DungeonNoir500)
+                            .border(1.dp, SteelSilver200, RoundedCornerShape(2.dp))
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(progreso.coerceIn(0f, 1f))
+                                .fillMaxHeight()
+                                .background(
+                                    Brush.horizontalGradient(
+                                        colors = listOf(AncientGold700, AncientGold, AncientGold200)
+                                    )
+                                )
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // ── Card de misión activa (placeholder) ─────────────
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(6.dp))
+                    .background(DungeonNoir700)
+                    .border(
+                        width = 1.dp,
+                        color = SteelSilver200,
+                        shape = RoundedCornerShape(6.dp)
+                    )
+                    .padding(20.dp)
+            ) {
+                Column {
+                    Text(
+                        text = "MISIÓN ACTIVA",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = AmberFlame,
+                        letterSpacing = 1.sp
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "${(progreso * 100).toInt()}% completado para el Nivel ${nivel + 1}",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        text = "Sin misión en curso",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = SteelSilver
+                    )
+                    Text(
+                        text = "Pulsa INICIAR MISIÓN para comenzar una sesión de estudio y ganar XP.",
+                        style = MaterialTheme.typography.bodySmall.copy(fontStyle = FontStyle.Italic),
+                        color = SteelSilver500
                     )
                 }
             }
@@ -119,6 +281,7 @@ fun HomeScreen(navController: NavController) {
     }
 }
 
+// ── StatItem: número grande + label pequeño ─────────────────────
 @Composable
 fun StatItem(label: String, value: String) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -126,8 +289,25 @@ fun StatItem(label: String, value: String) {
             text = value,
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary
+            color = AncientGold
         )
-        Text(text = label, style = MaterialTheme.typography.bodyMedium)
+        Spacer(modifier = Modifier.height(2.dp))
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            color = SteelSilver500,
+            letterSpacing = 0.8.sp
+        )
     }
+}
+
+// ── Separador vertical entre stats ──────────────────────────────
+@Composable
+private fun StatItemDivider() {
+    Box(
+        modifier = Modifier
+            .width(1.dp)
+            .height(48.dp)
+            .background(SteelSilver200)
+    )
 }

@@ -9,24 +9,20 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitClient {
+    // Apunta de forma exclusiva a tu BFF
     private const val BASE_URL = "http://10.0.2.2:8000/"
 
-    // Variable para almacenar temporalmente el TokenManager
     private var tokenManager: TokenManager? = null
 
-    // Función para inicializar el cliente desde MainActivity o MainScreen
     fun initialize(context: Context) {
         if (tokenManager == null) {
             tokenManager = TokenManager(context)
         }
     }
 
-    // El interceptor que inyecta el token en cada petición HTTP
     private val authInterceptor = Interceptor { chain ->
         val requestBuilder = chain.request().newBuilder()
 
-        // Leemos el token guardado. runBlocking es seguro aquí porque
-        // OkHttp ejecuta esto en un hilo de fondo, no en el principal (UI)
         val token = runBlocking {
             tokenManager?.getToken?.firstOrNull()
         }
@@ -44,7 +40,7 @@ object RetrofitClient {
 
     private val retrofit = Retrofit.Builder()
         .baseUrl(BASE_URL)
-        .client(okHttpClient) // Le conectamos nuestro cliente con interceptor
+        .client(okHttpClient)
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 

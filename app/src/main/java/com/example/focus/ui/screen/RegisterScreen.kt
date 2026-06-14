@@ -1,73 +1,276 @@
 package com.example.focus.ui.screen
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.example.focus.network.RegisterPayload
-import com.example.focus.network.RetrofitClient
-import kotlinx.coroutines.launch
+import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import com.example.focus.network.TokenManager
+import com.example.focus.viewmodel.AuthViewModel
+import com.example.focus.viewmodel.AuthViewModelFactory
+import com.example.focus.ui.theme.*
+import com.example.focus.ui.OrnamentalDivider
 
 @Composable
-fun RegisterScreen() {
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var mensaje by remember { mutableStateOf("") }
+fun RegisterScreen(navController: NavController) {
 
-    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val tokenManager = remember { TokenManager(context) }
 
-    Column(
+    val viewModel: AuthViewModel = viewModel(
+        factory = AuthViewModelFactory(tokenManager)
+    )
+
+    // Sincronizamos los estados locales con el ViewModel para no romper su lógica interna
+    var localEmail by remember { mutableStateOf("") }
+    var localPassword by remember { mutableStateOf("") }
+
+    val mensaje   by viewModel.mensaje.collectAsState()
+    val isError   by viewModel.isError.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
+
+    val backgroundGradient = Brush.verticalGradient(
+        colors = listOf(InkBlack, DungeonNoir, DungeonNoir700)
+    )
+
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+            .background(backgroundGradient)
     ) {
-        Text(text = "Crear Cuenta en Focus", style = MaterialTheme.typography.headlineMedium)
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 32.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
 
-        Spacer(modifier = Modifier.height(32.dp))
+            // ── Encabezado ──────────────────────────────────────
+            Text(
+                text = "FORJAR NUEVA CUENTA",
+                style = MaterialTheme.typography.headlineMedium,
+                color = AncientGold,
+                textAlign = TextAlign.Center
+            )
 
-        OutlinedTextField(
-            value = email,
-            onValueChange = { email = it },
-            label = { Text("Correo Electrónico") },
-            modifier = Modifier.fillMaxWidth()
-        )
+            Spacer(modifier = Modifier.height(4.dp))
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = "Inscribe tu nombre en los registros del gremio",
+                style = MaterialTheme.typography.bodyMedium.copy(fontStyle = FontStyle.Italic),
+                color = SteelSilver500,
+                textAlign = TextAlign.Center
+            )
 
-        OutlinedTextField(
-            value = password,
-            onValueChange = { password = it },
-            label = { Text("Contraseña") },
-            visualTransformation = PasswordVisualTransformation(),
-            modifier = Modifier.fillMaxWidth()
-        )
+            Spacer(modifier = Modifier.height(12.dp))
+            OrnamentalDivider()
+            Spacer(modifier = Modifier.height(32.dp))
 
-        Spacer(modifier = Modifier.height(32.dp))
+            // ── Card de formulario ──────────────────────────────
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(6.dp))
+                    .background(DungeonNoir700)
+                    .border(
+                        width = 1.dp,
+                        brush = Brush.linearGradient(
+                            colors = listOf(SaddleBrown, AncientGold700, SaddleBrown)
+                        ),
+                        shape = RoundedCornerShape(6.dp)
+                    )
+                    .padding(24.dp)
+            ) {
+                Column {
 
-        Button(
-            onClick = {
-                scope.launch {
-                    try {
-                        val payload = RegisterPayload(email = email, password = password)
-                        val response = RetrofitClient.apiService.register(payload)
-                        mensaje = "¡Registro exitoso! ID: ${response.id}"
-                    } catch (e: Exception) {
-                        mensaje = "Error al registrar: ${e.message}"
+                    // ── Badge de rareza ─────────────────────────
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(2.dp))
+                            .background(SaddleBrown700)
+                            .border(1.dp, SaddleBrown, RoundedCornerShape(2.dp))
+                            .padding(horizontal = 10.dp, vertical = 4.dp)
+                    ) {
+                        Text(
+                            text = "✦  NUEVO AVENTURERO",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = AncientGold,
+                            letterSpacing = 1.sp
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    // ── Campo email ─────────────────────────────
+                    Text(
+                        text = "CORREO DEL AVENTURERO",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = AncientGold700,
+                        letterSpacing = 1.sp
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+                    OutlinedTextField(
+                        value = localEmail,
+                        onValueChange = {
+                            localEmail = it
+                            viewModel.onEmailChange(it)
+                        },
+                        placeholder = { Text("tu@correo.com", color = SteelSilver500) },
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor      = AncientGold,
+                            unfocusedBorderColor    = SteelSilver200,
+                            focusedTextColor        = SteelSilver,
+                            unfocusedTextColor      = SteelSilver,
+                            cursorColor             = AncientGold,
+                            focusedContainerColor   = DungeonNoir500,
+                            unfocusedContainerColor = DungeonNoir500
+                        ),
+                        shape = RoundedCornerShape(4.dp),
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true
+                    )
+
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    // ── Campo contraseña ────────────────────────
+                    Text(
+                        text = "PALABRA DE PASO SECRETA",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = AncientGold700,
+                        letterSpacing = 1.sp
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+                    OutlinedTextField(
+                        value = localPassword,
+                        onValueChange = {
+                            localPassword = it
+                            viewModel.onPasswordChange(it)
+                        },
+                        placeholder = { Text("••••••••", color = SteelSilver500) },
+                        visualTransformation = PasswordVisualTransformation(),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor      = AncientGold,
+                            unfocusedBorderColor    = SteelSilver200,
+                            focusedTextColor        = SteelSilver,
+                            unfocusedTextColor      = SteelSilver,
+                            cursorColor             = AncientGold,
+                            focusedContainerColor   = DungeonNoir500,
+                            unfocusedContainerColor = DungeonNoir500
+                        ),
+                        shape = RoundedCornerShape(4.dp),
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // ── Hint de seguridad ───────────────────────
+                    Text(
+                        text = "⚔  Mínimo 8 caracteres para fortaleza de guerrero",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = SteelSilver500,
+                        fontStyle = FontStyle.Italic
+                    )
+
+                    Spacer(modifier = Modifier.height(28.dp))
+
+                    // ── Botón principal ─────────────────────────
+                    Button(
+                        onClick = {
+                            viewModel.register(onSuccess = {
+                                navController.navigate("login") {
+                                    popUpTo("register") { inclusive = true }
+                                }
+                            })
+                        },
+                        enabled = !isLoading,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(52.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor         = AncientGold,
+                            contentColor           = InkBlack,
+                            disabledContainerColor = AncientGold700
+                        ),
+                        shape = RoundedCornerShape(4.dp),
+                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 6.dp)
+                    ) {
+                        if (isLoading) {
+                            CircularProgressIndicator(
+                                color       = InkBlack,
+                                modifier    = Modifier.size(22.dp),
+                                strokeWidth = 2.dp
+                            )
+                        } else {
+                            Text(
+                                text = "INSCRIBIRSE EN EL GREMIO",
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+
+                    // ── Mensaje de feedback ─────────────────────
+                    if (mensaje.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(4.dp))
+                                .background(if (isError) DragonRedSurface else DungeonNoir500)
+                                .border(
+                                    width = 1.dp,
+                                    color = if (isError) DragonRed else DungeonGreen,
+                                    shape = RoundedCornerShape(4.dp)
+                                )
+                                .padding(horizontal = 12.dp, vertical = 10.dp)
+                        ) {
+                            Text(
+                                text = mensaje,
+                                color = if (isError) AmberFlame200 else AncientGold200,
+                                style = MaterialTheme.typography.bodySmall,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
                     }
                 }
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Registrarse")
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // ── Link a login ────────────────────────────────────
+            TextButton(
+                onClick = { navController.navigate("login") }
+            ) {
+                Text(
+                    text = "¿Ya eres miembro? ",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = SteelSilver500
+                )
+                Text(
+                    text = "Entra al gremio",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = AncientGold,
+                    fontWeight = FontWeight.Bold
+                )
+            }
         }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text(text = mensaje, color = MaterialTheme.colorScheme.primary)
     }
 }
