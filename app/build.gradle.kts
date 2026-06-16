@@ -41,6 +41,21 @@ android {
 }
 
 dependencies {
+    // Basic Material icons (includes PlayArrow)
+    implementation("androidx.compose.material:material-icons-core")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+// Optional: Add this if you plan to use a wider variety of Material icons later
+    implementation("androidx.compose.material:material-icons-extended")
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
+    // Retrofit para peticiones HTTP
+    implementation("com.squareup.retrofit2:retrofit:2.11.0")
+
+    // Convertidor para usar kotlinx.serialization con Retrofit
+    implementation("com.squareup.retrofit2:converter-kotlinx-serialization:2.11.0")
+
+    // OkHttp (Motor de Retrofit) para interceptar peticiones y ver logs
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
