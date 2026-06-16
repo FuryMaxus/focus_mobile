@@ -28,15 +28,12 @@ import com.example.focus.viewmodel.HomeViewModelFactory
 import com.example.focus.ui.theme.*
 import com.example.focus.ui.OrnamentalDivider
 
-// ═══════════════════════════════════════════════════════════════
-//  HomeScreen — solo cambios visuales
-//  Toda la lógica del ViewModel permanece idéntica al original
-// ═══════════════════════════════════════════════════════════════
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(navController: NavController) {
 
-    // ── Lógica original intacta ─────────────────────────────────
+
     val context = LocalContext.current
     val tokenManager = remember { TokenManager(context) }
 
@@ -127,7 +124,7 @@ fun HomeScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // ── Saludo / título de sección ──────────────────────
+
             Text(
                 text = "¡Aventura a la vista!",
                 style = MaterialTheme.typography.headlineMedium,
@@ -185,7 +182,7 @@ fun HomeScreen(navController: NavController) {
 
                     Spacer(modifier = Modifier.height(20.dp))
 
-                    // Stats row
+
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceEvenly

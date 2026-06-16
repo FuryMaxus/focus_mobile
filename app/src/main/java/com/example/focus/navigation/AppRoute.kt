@@ -11,4 +11,11 @@ sealed interface AppRoute {
 
     @Serializable
     data object Clock : AppRoute
+    @Serializable data object Menu : AppRoute
+
+    @Serializable data object Login : AppRoute
+
+    @Serializable data object Register : AppRoute
+
+    @Serializable data object Group : AppRoute
 }

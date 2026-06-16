@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
 
 class HomeViewModel(private val tokenManager: TokenManager) : ViewModel() {
 
-    // Exponemos el nivel directamente desde el TokenManager
+
     val nivel: StateFlow<Int> = tokenManager.getLevel
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
 

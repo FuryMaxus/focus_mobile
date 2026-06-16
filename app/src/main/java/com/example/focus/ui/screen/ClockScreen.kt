@@ -42,15 +42,12 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.foundation.Canvas
 
-// ═══════════════════════════════════════════════════════════════
-//  ClockScreen — Rediseño visual completo con animaciones
-//  Lógica de negocio: idéntica al original
-// ═══════════════════════════════════════════════════════════════
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ClockScreen(navController: NavController) {
 
-    // ── Lógica original intacta ─────────────────────────────────
+
     val context = LocalContext.current
     val scope   = rememberCoroutineScope()
     var isRunning        by remember { mutableStateOf(false) }
@@ -64,12 +61,10 @@ fun ClockScreen(navController: NavController) {
             seconds++
         }
     }
-    // ────────────────────────────────────────────────────────────
 
-    // ── Estado de animación ─────────────────────────────────────
     val isPulsing = isRunning
 
-    // Pulso del anillo exterior — late como un corazón
+
     val pulseAnim = rememberInfiniteTransition(label = "pulse")
     val pulseScale by pulseAnim.animateFloat(
         initialValue = 1f,
@@ -81,7 +76,7 @@ fun ClockScreen(navController: NavController) {
         label = "pulseScale"
     )
 
-    // Rotación lenta del anillo de runas decorativo
+
     val runeRotation by pulseAnim.animateFloat(
         initialValue = 0f,
         targetValue  = 360f,
@@ -91,7 +86,7 @@ fun ClockScreen(navController: NavController) {
         label = "runeRot"
     )
 
-    // Brillo del número (parpadeo muy sutil)
+
     val glowAlpha by pulseAnim.animateFloat(
         initialValue = 0.6f,
         targetValue  = 1f,
@@ -125,7 +120,7 @@ fun ClockScreen(navController: NavController) {
         label = "pAlpha"
     )
 
-    // Progreso del arco SVG (sube cada 60 segundos en ciclo)
+
     val arcProgress = if (seconds == 0) 0f else ((seconds % 60) / 60f)
     val arcProgressAnim by animateFloatAsState(
         targetValue = arcProgress,
@@ -133,7 +128,7 @@ fun ClockScreen(navController: NavController) {
         label = "arc"
     )
 
-    // Frases motivacionales que rotan cada 30s
+
     val quotes = listOf(
         "\"El conocimiento forja héroes.\"",
         "\"Cada minuto es XP ganada.\"",
@@ -204,15 +199,14 @@ fun ClockScreen(navController: NavController) {
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
 
-                // ── Parte superior: franja de estado ───────────
                 StatusBadge(isRunning = isRunning, seconds = seconds)
 
-                // ── Centro: reloj con animaciones ───────────────
+
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier.weight(1f)
                 ) {
-                    // Partículas de fuego (solo cuando corre)
+
                     if (isRunning) {
                         FireParticles(
                             particle1Y = particle1Y,
@@ -222,7 +216,7 @@ fun ClockScreen(navController: NavController) {
                         )
                     }
 
-                    // Anillo exterior rotante (runas decorativas)
+
                     Box(
                         modifier = Modifier
                             .size(280.dp)
@@ -239,7 +233,7 @@ fun ClockScreen(navController: NavController) {
                         )
                     }
 
-                    // Anillo de progreso (arco Canvas)
+
                     Canvas(
                         modifier = Modifier
                             .size(240.dp)
@@ -248,7 +242,7 @@ fun ClockScreen(navController: NavController) {
                         val strokeWidth = 6.dp.toPx()
                         val inset = strokeWidth / 2f
 
-                        // Track (fondo del arco)
+
                         drawArc(
                             color       = DungeonNoir500,
                             startAngle  = -90f,
@@ -259,7 +253,7 @@ fun ClockScreen(navController: NavController) {
                             style       = Stroke(width = strokeWidth, cap = StrokeCap.Round)
                         )
 
-                        // Progreso en oro
+
                         if (arcProgressAnim > 0f) {
                             drawArc(
                                 brush = Brush.sweepGradient(
@@ -280,7 +274,7 @@ fun ClockScreen(navController: NavController) {
                         }
                     }
 
-                    // Círculo interior: fondo del reloj
+
                     Box(
                         modifier = Modifier
                             .size(210.dp)
@@ -297,7 +291,7 @@ fun ClockScreen(navController: NavController) {
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
 
-                            // Etiqueta superior
+
                             Text(
                                 text = if (isRunning) "EN MISIÓN" else if (seconds > 0) "EN PAUSA" else "LISTO",
                                 style = MaterialTheme.typography.labelSmall,
@@ -307,7 +301,7 @@ fun ClockScreen(navController: NavController) {
 
                             Spacer(modifier = Modifier.height(4.dp))
 
-                            // TIEMPO — número principal
+
                             val minutesStr = (seconds / 60).toString().padStart(2, '0')
                             val secondsStr = (seconds % 60).toString().padStart(2, '0')
 
@@ -334,7 +328,7 @@ fun ClockScreen(navController: NavController) {
                     }
                 }
 
-                // ── Frase motivacional (rota cada 30s) ─────────
+
                 if (isRunning) {
                     Box(
                         modifier = Modifier
@@ -355,14 +349,14 @@ fun ClockScreen(navController: NavController) {
                     Spacer(modifier = Modifier.height(16.dp))
                 }
 
-                // ── Botones de control ──────────────────────────
+
                 Column(
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
 
                     if (!isRunning) {
-                        // INICIAR / REANUDAR
+
                         Button(
                             onClick = {
                                 isRunning = true
@@ -386,7 +380,7 @@ fun ClockScreen(navController: NavController) {
                             )
                         }
 
-                        // TERMINAR (solo si hay tiempo acumulado)
+
                         if (seconds > 0) {
                             Button(
                                 onClick = {
@@ -464,7 +458,7 @@ fun ClockScreen(navController: NavController) {
                         }
                     }
 
-                    // Mensaje de resultado
+
                     if (mensajeResultado.isNotEmpty()) {
                         val isError = mensajeResultado.startsWith("Error")
                         Box(
@@ -520,7 +514,7 @@ private fun StatusBadge(isRunning: Boolean, seconds: Int) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // Dot indicador animado
+
             Box(
                 modifier = Modifier
                     .size(8.dp)
@@ -548,7 +542,7 @@ private fun StatusBadge(isRunning: Boolean, seconds: Int) {
             )
         }
 
-        // Tiempo en minutos formateado
+
         Text(
             text = "${seconds / 60} min ${seconds % 60} seg",
             style = MaterialTheme.typography.labelSmall,
@@ -559,7 +553,7 @@ private fun StatusBadge(isRunning: Boolean, seconds: Int) {
     Spacer(modifier = Modifier.height(8.dp))
 }
 
-// ── Partículas de fuego flotantes ───────────────────────────────
+
 @Composable
 private fun FireParticles(
     particle1Y: Float,
@@ -571,28 +565,28 @@ private fun FireParticles(
         modifier = Modifier.size(280.dp),
         contentAlignment = Alignment.Center
     ) {
-        // Izquierda
+
         Box(
             modifier = Modifier
                 .offset(x = (-80).dp, y = particle1Y.dp)
                 .alpha(alpha)
         ) { Text("🔥", fontSize = 14.sp) }
 
-        // Centro arriba
+
         Box(
             modifier = Modifier
                 .offset(x = 0.dp, y = (particle2Y - 100).dp)
                 .alpha(alpha * 0.6f)
         ) { Text("✨", fontSize = 10.sp) }
 
-        // Derecha
+
         Box(
             modifier = Modifier
                 .offset(x = 80.dp, y = particle3Y.dp)
                 .alpha(alpha)
         ) { Text("🔥", fontSize = 12.sp) }
 
-        // Sparkles adicionales
+
         Box(
             modifier = Modifier
                 .offset(x = (-40).dp, y = (particle1Y - 80).dp)
