@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.focus.navigation.AppRoute
 import com.example.focus.network.TokenManager
 import com.example.focus.viewmodel.AuthViewModel
 import com.example.focus.viewmodel.AuthViewModelFactory
@@ -166,8 +167,8 @@ fun LoginScreen(navController: NavController) {
                     Button(
                         onClick = {
                             viewModel.login(onSuccess = {
-                                navController.navigate("home") {
-                                    popUpTo("login") { inclusive = true }
+                                navController.navigate(AppRoute.Home) {
+                                    popUpTo(AppRoute.Login) { inclusive = true }
                                 }
                             })
                         },

@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.focus.navigation.AppRoute
 import com.example.focus.network.TokenManager
 import com.example.focus.viewmodel.AuthViewModel
 import com.example.focus.viewmodel.AuthViewModelFactory
@@ -194,8 +195,8 @@ fun RegisterScreen(navController: NavController) {
                     Button(
                         onClick = {
                             viewModel.register(onSuccess = {
-                                navController.navigate("login") {
-                                    popUpTo("register") { inclusive = true }
+                                navController.navigate(AppRoute.Login) {
+                                    popUpTo(AppRoute.Register) { inclusive = true }
                                 }
                             })
                         },
@@ -257,7 +258,7 @@ fun RegisterScreen(navController: NavController) {
 
             // ── Link a login ────────────────────────────────────
             TextButton(
-                onClick = { navController.navigate("login") }
+                onClick = { navController.navigate(AppRoute.Login) }
             ) {
                 Text(
                     text = "¿Ya eres miembro? ",
