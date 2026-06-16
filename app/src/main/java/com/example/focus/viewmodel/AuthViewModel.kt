@@ -54,7 +54,7 @@ class AuthViewModel(private val tokenManager: TokenManager) : ViewModel() {
                 }
             } catch (e: Exception) {
                 _isError.value = true
-                _mensaje.value = "Error al iniciar sesión: HTTP ${e.message?.take(3)}" // Extraemos el código de error para diagnosticar mejor
+                _mensaje.value = "Error al iniciar sesión: HTTP ${e.message}" // Extraemos el código de error para diagnosticar mejor
             } finally {
                 _isLoading.value = false
             }
@@ -80,7 +80,7 @@ class AuthViewModel(private val tokenManager: TokenManager) : ViewModel() {
                 onSuccess()
             } catch (e: Exception) {
                 _isError.value = true
-                _mensaje.value = "Error al registrar: HTTP ${e.message?.take(3)}"
+                _mensaje.value = "Error al registrar: HTTP ${e.message}"
             } finally {
                 _isLoading.value = false
             }

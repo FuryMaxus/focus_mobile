@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.focus.navigation.AppRoute
 import com.example.focus.network.TokenManager
 import com.example.focus.viewmodel.HomeViewModel
 import com.example.focus.viewmodel.HomeViewModelFactory
@@ -73,7 +74,7 @@ fun HomeScreen(navController: NavController) {
                     IconButton(
                         onClick = {
                             viewModel.logout(onLogoutSuccess = { // lógica intacta
-                                navController.navigate("menu") {
+                                navController.navigate(AppRoute.Menu) {
                                     popUpTo(0) { inclusive = true }
                                 }
                             })
@@ -90,7 +91,7 @@ fun HomeScreen(navController: NavController) {
         },
         floatingActionButton = {
             ExtendedFloatingActionButton(
-                onClick = { navController.navigate("clock") }, // lógica intacta
+                onClick = { navController.navigate(AppRoute.Clock) }, // lógica intacta
                 containerColor = AmberFlame,
                 contentColor   = InkBlack,
                 shape          = RoundedCornerShape(4.dp),

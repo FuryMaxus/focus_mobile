@@ -65,6 +65,7 @@ interface ApiService {
     suspend fun register(@Body payload: RegisterPayload): RegisterResponse
 
     // Ruta de sincronización de XP apuntando al BFF
+    //TODO: Creo que esta ruta esta mal
     @POST("api/v1/sync")
     suspend fun syncSessions(@Body payload: SyncPayload): Response<SyncResponse>
 }
