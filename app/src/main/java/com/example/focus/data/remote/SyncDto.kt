@@ -24,6 +24,7 @@ data class SyncResponse(
     val status: String,
     val processedSessionsCount: Int,
     val totalExp: Int,
+    val totalExpGained: Int,
     val currentLevel: Int,
     val leveledUp: Boolean,
     val levelsGained: Int,
