@@ -17,7 +17,6 @@ interface ApiService {
     @POST("api/v1/auth/register")
     suspend fun register(@Body payload: RegisterPayload): RegisterResponse
 
-    //TODO: Creo que esta ruta esta mal
     @POST("api/v1/sync")
     suspend fun syncSessions(@Body payload: SyncPayload): Response<SyncResponse>
 }
