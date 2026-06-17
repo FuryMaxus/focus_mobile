@@ -31,7 +31,7 @@ class HomeViewModel @Inject constructor(
         )
 
     val expFaltante: StateFlow<Int> = combine(nivel, expActual) { niv, exp ->
-        val expNecesaria = niv * 100 // Asumiendo que cada nivel pide 100 XP (ajústalo a tu fórmula)
+        val expNecesaria = niv * 100
         val faltante = expNecesaria - exp
         if (faltante > 0) faltante else 0
     }.stateIn(
