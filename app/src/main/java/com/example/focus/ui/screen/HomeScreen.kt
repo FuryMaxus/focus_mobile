@@ -13,34 +13,25 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
-import com.example.focus.navigation.AppRoute
-import com.example.focus.network.TokenManager
 import com.example.focus.viewmodel.HomeViewModel
-import com.example.focus.viewmodel.HomeViewModelFactory
 import com.example.focus.ui.theme.*
 import com.example.focus.ui.OrnamentalDivider
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(navController: NavController) {
+fun HomeScreen(
+    viewModel: HomeViewModel = hiltViewModel(),
+    onNavigateToMenu: () -> Unit,
+    onNavigateToClock: () -> Unit
+) {
 
-
-    val context = LocalContext.current
-    val tokenManager = remember { TokenManager(context) }
-
-    val viewModel: HomeViewModel = viewModel(
-        factory = HomeViewModelFactory(tokenManager)
-    )
 
     val nivel      by viewModel.nivel.collectAsState()
     val expActual  by viewModel.expActual.collectAsState()
@@ -73,10 +64,8 @@ fun HomeScreen(navController: NavController) {
                 actions = {
                     IconButton(
                         onClick = {
-                            viewModel.logout(onLogoutSuccess = { // lógica intacta
-                                navController.navigate(AppRoute.Menu) {
-                                    popUpTo(0) { inclusive = true }
-                                }
+                            viewModel.logout(onLogoutSuccess = {
+                                onNavigateToMenu()
                             })
                         }
                     ) {
@@ -91,7 +80,7 @@ fun HomeScreen(navController: NavController) {
         },
         floatingActionButton = {
             ExtendedFloatingActionButton(
-                onClick = { navController.navigate(AppRoute.Clock) }, // lógica intacta
+                onClick = { onNavigateToClock() },
                 containerColor = AmberFlame,
                 contentColor   = InkBlack,
                 shape          = RoundedCornerShape(4.dp),

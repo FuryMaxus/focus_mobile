@@ -10,34 +10,27 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
+
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
-import com.example.focus.navigation.AppRoute
-import com.example.focus.network.TokenManager
-import com.example.focus.viewmodel.AuthViewModel
-import com.example.focus.viewmodel.AuthViewModelFactory
+
 import com.example.focus.ui.theme.*
 import com.example.focus.ui.OrnamentalDivider
+import com.example.focus.viewmodel.AuthViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 
 @Composable
-fun LoginScreen(navController: NavController) {
+fun LoginScreen(
+    viewModel: AuthViewModel = hiltViewModel(),
+    onNavigateHome: () -> Unit,
+    onNavigateToRegister: () -> Unit
+) {
 
-    val context = LocalContext.current
-    val tokenManager = remember { TokenManager(context) }
 
-    val viewModel: AuthViewModel = viewModel(
-        factory = AuthViewModelFactory(tokenManager)
-    )
-
-    // Sincronizamos los estados locales con el ViewModel
     var localEmail by remember { mutableStateOf("") }
     var localPassword by remember { mutableStateOf("") }
 
@@ -167,9 +160,7 @@ fun LoginScreen(navController: NavController) {
                     Button(
                         onClick = {
                             viewModel.login(onSuccess = {
-                                navController.navigate(AppRoute.Home) {
-                                    popUpTo(AppRoute.Login) { inclusive = true }
-                                }
+                                onNavigateHome()
                             })
                         },
                         enabled = !isLoading,
@@ -230,7 +221,7 @@ fun LoginScreen(navController: NavController) {
 
             // ── Link a registro ─────────────────────────────────
             TextButton(
-                onClick = { navController.navigate("register") }
+                onClick = { onNavigateToRegister() }
             ) {
                 Text(
                     text = "¿Aún no eres miembro? ",

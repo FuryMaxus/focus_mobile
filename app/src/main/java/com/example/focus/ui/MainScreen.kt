@@ -8,31 +8,25 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-
-// Imports de navegación y vistas de Jose
 import com.example.focus.navigation.AppRoute
 import com.example.focus.navigation.NavigationEvent
 import com.example.focus.viewmodel.MainViewModel
-
-// Imports de tus pantallas
 import com.example.focus.ui.screen.LoginScreen
 import com.example.focus.ui.screen.RegisterScreen
 import com.example.focus.ui.screen.HomeScreen
 import com.example.focus.ui.screen.ClockScreen
 import com.example.focus.ui.screen.DebugScreen
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen() {
-    val context = LocalContext.current
     val navController = rememberNavController()
 
-
-    val mainViewModel: MainViewModel = viewModel()
+    val mainViewModel: MainViewModel = hiltViewModel()
 
 
     LaunchedEffect(Unit) {
@@ -60,41 +54,60 @@ fun MainScreen() {
     Scaffold { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = AppRoute.Menu, // Iniciamos en tu Menú usando la clase segura
+            startDestination = AppRoute.Menu,
             modifier = Modifier.padding(innerPadding)
         ) {
-
-
-
             composable<AppRoute.Menu> {
                 MenuScreen(
-
                     onNavigateToLogin = { mainViewModel.navigateTo(AppRoute.Login) },
                     onNavigateToRegister = { mainViewModel.navigateTo(AppRoute.Register) }
                 )
             }
 
             composable<AppRoute.Login> {
-
-                LoginScreen(navController = navController)
+                LoginScreen(
+                    onNavigateHome = {
+                        mainViewModel.navigateTo(
+                            destination = AppRoute.Home,
+                            popUpTo = AppRoute.Login,
+                            inclusive = true
+                        )
+                    },
+                    onNavigateToRegister = { mainViewModel.navigateTo(AppRoute.Register) }
+                )
             }
 
             composable<AppRoute.Register> {
-                RegisterScreen(navController = navController)
+                RegisterScreen(
+                    onNavigateToLogin = {
+                        mainViewModel.navigateTo(
+                            destination = AppRoute.Login,
+                            popUpTo = AppRoute.Register,
+                            inclusive = true
+                        )
+                    }
+                )
             }
 
             composable<AppRoute.Home> {
-                HomeScreen(navController = navController)
+                HomeScreen(
+                    onNavigateToMenu = {
+                        mainViewModel.navigateTo(
+                            destination = AppRoute.Menu,
+                            popUpTo = 0,
+                            inclusive = true
+                        )
+                    },
+                    onNavigateToClock = { mainViewModel.navigateTo(AppRoute.Clock) }
+                )
             }
-
-            // --- LAS PANTALLAS ORIGINALES ---
 
             composable<AppRoute.Debug> {
                 DebugScreen(onTimerButtonClick = { mainViewModel.navigateTo(AppRoute.Clock) })
             }
 
             composable<AppRoute.Clock> {
-                ClockScreen(navController = navController) // Ajusta esto según si tu ClockScreen pide navController o no
+                ClockScreen(navController = navController)
             }
         }
     }

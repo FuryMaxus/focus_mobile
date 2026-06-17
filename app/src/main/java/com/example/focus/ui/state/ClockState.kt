@@ -3,10 +3,11 @@ package com.example.focus.ui.state
 import android.annotation.SuppressLint
 
 data class ClockState(
-    val timeInSeconds: Long = 0L,
+    val timeInSeconds: Int = 0,
     val isRunning: Boolean = false,
-    val isCountdown: Boolean = false,
-    val inputMinutes: String = "25"
+
+    val message: String = "",
+    val isError: Boolean = false
 ) {
     val formattedTime: String
         @SuppressLint("DefaultLocale")
