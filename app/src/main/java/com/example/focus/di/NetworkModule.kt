@@ -1,11 +1,12 @@
-package com.example.focus.network
+package com.example.focus.di
 
+import com.example.focus.data.local.UserPreferences
+import com.example.focus.network.ApiService
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import javax.inject.Singleton
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonNamingStrategy
@@ -14,7 +15,7 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
-import com.example.focus.data.local.UserPreferences
+import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
