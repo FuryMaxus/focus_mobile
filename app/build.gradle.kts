@@ -2,6 +2,9 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     kotlin("plugin.serialization") version "2.2.10"
+    id("com.google.devtools.ksp") version "2.2.10-2.0.2"
+
+    id("com.google.dagger.hilt.android")
 }
 
 android {
@@ -79,4 +82,19 @@ dependencies {
     implementation(libs.androidx.room.runtime)
     annotationProcessor(libs.androidx.room.compiler)
     implementation(libs.kotlinx.serialization.json)
+    // Kotlinx Serialization
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
+
+    // Retrofit Kotlinx Serialization Converter (Jake Wharton)
+    implementation("com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:1.0.0")
+
+    // OkHttp Logging Interceptor
+    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+
+    implementation(libs.hilt.android)
+
+    ksp(libs.hilt.android.compiler)
+
+    implementation(libs.androidx.hilt.navigation.compose)
+
 }
