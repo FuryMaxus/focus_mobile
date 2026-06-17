@@ -23,7 +23,7 @@ data class RewardItem(
 data class SyncResponse(
     val status: String,
     val processedSessionsCount: Int,
-    val totalExpGained: Int,
+    val totalExp: Int,
     val currentLevel: Int,
     val leveledUp: Boolean,
     val levelsGained: Int,
