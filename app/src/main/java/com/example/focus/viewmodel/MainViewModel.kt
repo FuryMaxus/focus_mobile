@@ -3,11 +3,14 @@ package com.example.focus.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.focus.navigation.NavigationEvent
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class MainViewModel : ViewModel() {
+@HiltViewModel
+class MainViewModel @Inject constructor() : ViewModel() {
 
     private val _navEvents = Channel<NavigationEvent>()
     val navEvents = _navEvents.receiveAsFlow()
