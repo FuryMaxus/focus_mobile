@@ -24,7 +24,7 @@ class UserStatsRepository @Inject constructor(
                 if (syncData != null) {
                     userPreferences.saveLevelAndExp(
                         level = syncData.currentLevel,
-                        exp = syncData.totalExpGained
+                        exp = syncData.totalExp
                     )
                     Result.success(syncData)
                 } else {
