@@ -102,8 +102,8 @@ fun MainScreen() {
                     onNavigateToMenu = {
                         mainViewModel.logout()
                         mainViewModel.navigateTo(
-                            destination = AppRoute.Home,
-                            popUpTo = 0,
+                            destination = AppRoute.Menu,
+                            popUpTo = AppRoute.Home,
                             inclusive = true
                         )
                     },
