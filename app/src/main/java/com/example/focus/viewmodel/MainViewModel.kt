@@ -2,6 +2,7 @@ package com.example.focus.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.focus.data.local.UserPreferences
 import com.example.focus.navigation.NavigationEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -10,7 +11,17 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class MainViewModel @Inject constructor() : ViewModel() {
+class MainViewModel @Inject constructor(
+    private val userPreferences: UserPreferences
+) : ViewModel() {
+
+    val token = userPreferences.getToken
+
+    fun logout() {
+        viewModelScope.launch {
+            userPreferences.clearSession()
+        }
+    }
 
     private val _navEvents = Channel<NavigationEvent>()
     val navEvents = _navEvents.receiveAsFlow()
