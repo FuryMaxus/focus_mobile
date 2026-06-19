@@ -6,8 +6,10 @@ import com.example.focus.data.remote.RegisterResponse
 import com.example.focus.data.remote.SyncPayload
 import com.example.focus.data.remote.SyncResponse
 import com.example.focus.data.remote.TokenResponse
+import com.example.focus.data.remote.UserStatsDto
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.GET
 import retrofit2.http.POST
 
 interface ApiService {
@@ -19,4 +21,7 @@ interface ApiService {
 
     @POST("api/v1/sync")
     suspend fun syncSessions(@Body payload: SyncPayload): Response<SyncResponse>
+
+    @GET("api/v1/users/me/stats")
+    suspend fun getUserStats(): UserStatsDto
 }
