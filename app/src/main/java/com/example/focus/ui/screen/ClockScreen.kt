@@ -28,7 +28,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.navigation.NavController
 import com.example.focus.ui.theme.*
 import com.example.focus.viewmodel.ClockViewModel
 import kotlin.time.Duration.Companion.milliseconds
