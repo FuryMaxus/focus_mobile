@@ -2,6 +2,7 @@ package com.example.focus.di
 
 import com.example.focus.data.local.UserPreferences
 import com.example.focus.network.ApiService
+import com.example.focus.network.AuthInterceptor
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import dagger.Module
 import dagger.Provides
@@ -23,20 +24,9 @@ object NetworkModule {
 
     private const val BASE_URL = "http://192.168.1.19:8000/"
 
-
     @Provides
     @Singleton
-    fun provideOkHttpClient(userPreferences: UserPreferences): OkHttpClient {
-        val authInterceptor = Interceptor { chain ->
-            val requestBuilder = chain.request().newBuilder()
-
-            val token = userPreferences.cachedToken
-
-            if (!token.isNullOrEmpty()) {
-                requestBuilder.addHeader("Authorization", "Bearer $token")
-            }
-            chain.proceed(requestBuilder.build())
-        }
+    fun provideOkHttpClient(authInterceptor: AuthInterceptor): OkHttpClient {
 
         val loggingInterceptor = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
