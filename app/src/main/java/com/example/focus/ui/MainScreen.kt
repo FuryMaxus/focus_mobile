@@ -22,6 +22,7 @@ import com.example.focus.ui.screen.HomeScreen
 import com.example.focus.ui.screen.ClockScreen
 import com.example.focus.ui.screen.DebugScreen
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.example.focus.network.AuthEvent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -49,6 +50,20 @@ fun MainScreen() {
                 }
                 NavigationEvent.NavigateUp -> navController.navigateUp()
                 NavigationEvent.PopBackStack -> navController.popBackStack()
+            }
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        mainViewModel.authEvent.collect { event ->
+            when (event) {
+                is AuthEvent.LoggedOut -> {
+                    mainViewModel.navigateTo(
+                        destination = AppRoute.Menu,
+                        popUpTo = AppRoute.Home,
+                        inclusive = true
+                    )
+                }
             }
         }
     }
@@ -101,11 +116,6 @@ fun MainScreen() {
                 HomeScreen(
                     onNavigateToMenu = {
                         mainViewModel.logout()
-                        mainViewModel.navigateTo(
-                            destination = AppRoute.Menu,
-                            popUpTo = AppRoute.Home,
-                            inclusive = true
-                        )
                     },
                     onNavigateToClock = { mainViewModel.navigateTo(AppRoute.Clock) }
                 )
