@@ -37,7 +37,7 @@ import kotlinx.coroutines.delay
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ClockScreen(
-    navController: NavController,
+    onNavigateBack: () -> Unit,
     viewModel: ClockViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
@@ -100,7 +100,7 @@ fun ClockScreen(
                     }
                 },
                 navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
+                    IconButton(onClick = onNavigateBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Atrás", tint = SteelSilver)
                     }
                 },

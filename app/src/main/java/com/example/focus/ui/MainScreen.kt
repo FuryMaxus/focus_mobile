@@ -99,7 +99,11 @@ fun MainScreen() {
                 )
             }
             composable<AppRoute.Clock> {
-                ClockScreen(navController = navController)
+                ClockScreen(
+                    onNavigateBack = {
+                       mainViewModel.navigateBack()
+                    }
+                )
             }
         }
     }
@@ -130,7 +134,6 @@ private fun HandleAppEffects(
             }
         }
     }
-
     LaunchedEffect(Unit) {
         mainViewModel.authEvent.collect { event ->
             when (event) {
