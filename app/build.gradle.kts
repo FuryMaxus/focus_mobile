@@ -105,5 +105,5 @@ dependencies {
     val work_version = "2.9.0"
     implementation("androidx.work:work-runtime-ktx:$work_version")
     implementation("androidx.hilt:hilt-work:1.2.0")
-
+    ksp("androidx.hilt:hilt-compiler:1.2.0")
 }
