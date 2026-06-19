@@ -1,4 +1,4 @@
-package com.example.focus.ui
+package com.example.focus.ui.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -22,7 +22,6 @@ fun OrnamentalDivider(modifier: Modifier = Modifier) {
             .padding(vertical = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Línea izquierda
         Box(
             modifier = Modifier
                 .weight(1f)

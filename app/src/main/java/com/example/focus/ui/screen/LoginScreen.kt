@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 import com.example.focus.ui.theme.*
-import com.example.focus.ui.OrnamentalDivider
+import com.example.focus.ui.component.OrnamentalDivider
 import com.example.focus.viewmodel.AuthViewModel
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 

@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -28,6 +30,7 @@ fun MainScreen() {
 
     val mainViewModel: MainViewModel = hiltViewModel()
 
+    val token by mainViewModel.token.collectAsState(initial = "LOADING")
 
     LaunchedEffect(Unit) {
         mainViewModel.navEvents.collect { event ->
@@ -50,11 +53,16 @@ fun MainScreen() {
         }
     }
 
+    if (token == "LOADING") {
+        return
+    }
+
+    val startRoute = if (token.isNullOrEmpty()) AppRoute.Menu else AppRoute.Home
 
     Scaffold { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = AppRoute.Menu,
+            startDestination = startRoute,
             modifier = Modifier.padding(innerPadding)
         ) {
             composable<AppRoute.Menu> {
@@ -69,7 +77,7 @@ fun MainScreen() {
                     onNavigateHome = {
                         mainViewModel.navigateTo(
                             destination = AppRoute.Home,
-                            popUpTo = AppRoute.Login,
+                            popUpTo = AppRoute.Menu,
                             inclusive = true
                         )
                     },
@@ -92,9 +100,10 @@ fun MainScreen() {
             composable<AppRoute.Home> {
                 HomeScreen(
                     onNavigateToMenu = {
+                        mainViewModel.logout()
                         mainViewModel.navigateTo(
                             destination = AppRoute.Menu,
-                            popUpTo = 0,
+                            popUpTo = AppRoute.Home,
                             inclusive = true
                         )
                     },
