@@ -20,11 +20,17 @@ class AuthRepository @Inject constructor(
 
             if (response.accessToken.isNotEmpty()) {
                 userPreferences.saveToken(response.accessToken)
+                val stats = apiService.getUserStats()
+                userPreferences.saveLevelAndExp(
+                    exp = stats.totalExp,
+                    level = stats.currentLevel
+                )
                 Result.success(Unit)
             } else {
                 Result.failure(Exception("El servidor no devolvió un token válido"))
             }
         } catch (e: Exception) {
+            userPreferences.clearSession()
             Result.failure(e)
         }
     }

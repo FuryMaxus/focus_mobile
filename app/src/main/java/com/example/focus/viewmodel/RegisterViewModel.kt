@@ -11,46 +11,27 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class AuthViewModel @Inject constructor(
+class RegisterViewModel @Inject constructor(
     private val authRepository: AuthRepository
 ) : ViewModel() {
 
     private val _email = MutableStateFlow("")
     val email: StateFlow<String> = _email.asStateFlow()
+
     private val _password = MutableStateFlow("")
     val password: StateFlow<String> = _password.asStateFlow()
+
     private val _mensaje = MutableStateFlow("")
     val mensaje: StateFlow<String> = _mensaje.asStateFlow()
+
     private val _isError = MutableStateFlow(false)
     val isError: StateFlow<Boolean> = _isError.asStateFlow()
+
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
     fun onEmailChange(newEmail: String) { _email.value = newEmail }
     fun onPasswordChange(newPassword: String) { _password.value = newPassword }
-
-    fun login(onSuccess: () -> Unit) {
-        if (_email.value.isBlank() || _password.value.isBlank()) {
-            _isError.value = true
-            _mensaje.value = "Los campos no pueden estar vacíos"
-            return
-        }
-        viewModelScope.launch {
-            _isLoading.value = true
-            _isError.value = false
-            _mensaje.value = ""
-            authRepository.login(_email.value.trim(), _password.value.trim()).fold(
-                onSuccess = {
-                    onSuccess()
-                },
-                onFailure = { exception ->
-                    _isError.value = true
-                    _mensaje.value = "Error al iniciar sesión: ${exception.message}"
-                }
-            )
-            _isLoading.value = false
-        }
-    }
 
     fun register(onSuccess: () -> Unit) {
         if (_email.value.isBlank() || _password.value.isBlank()) {
@@ -58,11 +39,18 @@ class AuthViewModel @Inject constructor(
             _mensaje.value = "Los campos no pueden estar vacíos"
             return
         }
+
         viewModelScope.launch {
             _isLoading.value = true
             _isError.value = false
             _mensaje.value = ""
-            authRepository.register(_email.value, _password.value).fold(
+
+            authRepository.register(
+                email =_email.value
+                    .trim(),
+                password = _password.value
+                    .trim()
+            ).fold(
                 onSuccess = {
                     _mensaje.value = "¡Registro exitoso!"
                     onSuccess()
@@ -76,6 +64,3 @@ class AuthViewModel @Inject constructor(
         }
     }
 }
-
-
-

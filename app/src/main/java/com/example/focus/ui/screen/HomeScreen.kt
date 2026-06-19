@@ -28,7 +28,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
-    onNavigateToMenu: () -> Unit,
+    onNavigateToAuthEntry: () -> Unit,
     onNavigateToClock: () -> Unit
 ) {
 
@@ -65,7 +65,7 @@ fun HomeScreen(
                     IconButton(
                         onClick = {
                             viewModel.logout(onLogoutSuccess = {
-                                onNavigateToMenu()
+                                onNavigateToAuthEntry()
                             })
                         }
                     ) {

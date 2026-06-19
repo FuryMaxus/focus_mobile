@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.focus.data.local.UserPreferences
 import com.example.focus.navigation.NavigationEvent
+import com.example.focus.network.AuthManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -12,14 +13,15 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    private val userPreferences: UserPreferences
+    private val userPreferences: UserPreferences,
+    private val authManager: AuthManager
 ) : ViewModel() {
 
     val token = userPreferences.getToken
-
+    val authEvent = authManager.authEvent
     fun logout() {
         viewModelScope.launch {
-            userPreferences.clearSession()
+            authManager.triggerSessionExpired()
         }
     }
 

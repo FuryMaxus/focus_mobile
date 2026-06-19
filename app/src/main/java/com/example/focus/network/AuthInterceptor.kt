@@ -8,7 +8,8 @@ import okhttp3.Response
 import javax.inject.Inject
 
 class AuthInterceptor @Inject constructor(
-    private val userPreferences: UserPreferences
+    private val userPreferences: UserPreferences,
+    private val authManager: AuthManager
 ) : Interceptor {
 
     override fun intercept(chain: Interceptor.Chain): Response {
@@ -20,6 +21,13 @@ class AuthInterceptor @Inject constructor(
             requestBuilder.addHeader("Authorization", "Bearer $token")
         }
 
-        return chain.proceed(requestBuilder.build())
+        val response = chain.proceed(requestBuilder.build())
+
+        if (response.code == 401) {
+            runBlocking {
+                authManager.triggerSessionExpired()
+            }
+        }
+        return response
     }
 }

@@ -30,3 +30,9 @@ data class SyncResponse(
     val levelsGained: Int,
     val rewards: List<RewardItem>
 )
+
+@Serializable
+data class UserStatsDto(
+    val totalExp: Int,
+    val currentLevel: Int
+)
