@@ -20,12 +20,12 @@ import androidx.compose.ui.unit.sp
 
 import com.example.focus.ui.theme.*
 import com.example.focus.ui.component.OrnamentalDivider
-import com.example.focus.viewmodel.AuthViewModel
+import com.example.focus.viewmodel.LoginViewModel
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 
 @Composable
 fun LoginScreen(
-    viewModel: AuthViewModel = hiltViewModel(),
+    viewModel: LoginViewModel = hiltViewModel(),
     onNavigateHome: () -> Unit,
     onNavigateToRegister: () -> Unit
 ) {

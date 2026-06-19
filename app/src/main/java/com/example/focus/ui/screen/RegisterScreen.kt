@@ -18,7 +18,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-import com.example.focus.viewmodel.AuthViewModel
+import com.example.focus.viewmodel.RegisterViewModel
 import com.example.focus.ui.theme.*
 import com.example.focus.ui.component.OrnamentalDivider
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -26,7 +26,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 
 @Composable
 fun RegisterScreen(
-    viewModel: AuthViewModel = hiltViewModel(),
+    viewModel: RegisterViewModel = hiltViewModel(),
     onNavigateToLogin: () -> Unit
 ) {
 
