@@ -2,9 +2,17 @@ package com.example.focus.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.work.Constraints
+import androidx.work.ExistingWorkPolicy
+import androidx.work.NetworkType
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import com.example.focus.data.local.dao.FocusSessionDao
+import com.example.focus.data.local.entity.FocusSessionEntity
 import com.example.focus.data.remote.SessionItem
 import com.example.focus.repository.UserStatsRepository
 import com.example.focus.ui.state.ClockState
+import com.example.focus.worker.SyncWorker
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -22,7 +30,8 @@ import kotlin.time.Duration.Companion.milliseconds
 
 @HiltViewModel
 class ClockViewModel @Inject constructor(
-    private val userStatsRepository: UserStatsRepository
+    private val focusSessionDao: FocusSessionDao,
+    private val workManager: WorkManager
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ClockState())
@@ -68,33 +77,52 @@ class ClockViewModel @Inject constructor(
         _state.update { it.copy(message = "Guardando sesión...", isError = false) }
 
         viewModelScope.launch {
-            val sessionItem = SessionItem(
-                activityType = "FOCUS",
-                startTime = formatter.format(currentStartTime),
-                endTime = formatter.format(endTime),
-                roomId = null
-            )
+            try {
+                val newSession = FocusSessionEntity(
+                    activityType = "NORMAL",
+                    startTime = formatter.format(currentStartTime),
+                    endTime = formatter.format(endTime),
+                    roomId = null,
+                    xpMultiplier = 1.0f
+                )
+                focusSessionDao.insertSession(newSession)
 
-            userStatsRepository.syncSession(sessionItem).fold(
-                onSuccess = { stats ->
-                    _state.update {
-                        it.copy(
-                            timeInSeconds = 0,
-                            message = "¡Sesión guardada! Nivel: ${stats.currentLevel} (+${stats.totalExpGained} EXP)",
-                            isError = false
-                        )
-                    }
-                    startTime = null
-                },
-                onFailure = { error ->
-                    _state.update {
-                        it.copy(
-                            message = "Error: ${error.message}",
-                            isError = true
-                        )
-                    }
+                triggerSyncWorker()
+
+                _state.update {
+                    it.copy(
+                        timeInSeconds = 0,
+                        message = "¡Misión completada! Se sincronizará automáticamente.",
+                        isError = false
+                    )
                 }
-            )
+                startTime = null
+
+            } catch (e: Exception) {
+                _state.update {
+                    it.copy(
+                        message = "Error al guardar en el pergamino local: ${e.message}",
+                        isError = true
+                    )
+                }
+            }
         }
     }
+
+    private fun triggerSyncWorker() {
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
+
+        val syncRequest = OneTimeWorkRequestBuilder<SyncWorker>()
+            .setConstraints(constraints)
+            .build()
+
+        workManager.enqueueUniqueWork(
+            "SyncSessionsWork",
+            ExistingWorkPolicy.REPLACE,
+            syncRequest
+        )
+    }
+
 }

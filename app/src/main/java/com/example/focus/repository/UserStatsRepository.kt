@@ -13,10 +13,8 @@ class UserStatsRepository @Inject constructor(
     private val apiService: ApiService,
     private val userPreferences: UserPreferences
 ) {
-    suspend fun syncSession(session: SessionItem): Result<SyncResponse> {
+    suspend fun syncBatchSessions(payload: SyncPayload): Result<SyncResponse> {
         return try {
-            val payload = SyncPayload(sessions = listOf(session))
-
             val response = apiService.syncSessions(payload)
 
             if (response.isSuccessful) {

@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
@@ -725,7 +726,7 @@ private fun RoomDetailScreen(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     IconButton(onClick = onBack, modifier = Modifier.size(32.dp)) {
-                        Icon(Icons.Filled.ArrowBack, "Volver", tint = SteelSilver)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Volver", tint = SteelSilver)
                     }
                     Text(
                         text = "$roomEmoji  ${room.name}",
