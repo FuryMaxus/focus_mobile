@@ -18,8 +18,8 @@ class UserPreferences @Inject constructor(
     private val TOKEN_KEY = stringPreferencesKey("jwt_token")
     private val LEVEL_KEY = intPreferencesKey("user_level")
     private val TOTAL_EXP_KEY = intPreferencesKey("toal_user_exp")
-
     private val EQUIPPED_ROOM_ID = stringPreferencesKey("equipped_room_id")
+    private val USER_ROLE = stringPreferencesKey("user_role")
 
     val getToken: Flow<String?> = dataStore.data.map { it[TOKEN_KEY] }
     val getLevel: Flow<Int> = dataStore.data.map { it[LEVEL_KEY] ?: 1 }
@@ -28,6 +28,8 @@ class UserPreferences @Inject constructor(
     val getEquippedRoomId: Flow<String?> = dataStore.data.map { preferences ->
         preferences[EQUIPPED_ROOM_ID]
     }
+
+    val getUserRole: Flow<String?> = dataStore.data.map { it[USER_ROLE] }
 
     var cachedToken: String? = null
         private set
@@ -58,5 +60,9 @@ class UserPreferences @Inject constructor(
         dataStore.edit { preferences ->
             preferences.remove(EQUIPPED_ROOM_ID)
         }
+    }
+
+    suspend fun saveRole(role: String) {
+        dataStore.edit { it[USER_ROLE] = role }
     }
 }
