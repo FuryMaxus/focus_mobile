@@ -17,6 +17,7 @@ import com.example.focus.ui.screen.LoginScreen
 import com.example.focus.ui.screen.RegisterScreen
 import com.example.focus.ui.screen.HomeScreen
 import com.example.focus.ui.screen.ClockScreen
+import com.example.focus.ui.screen.InventoryScreen
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.focus.network.AuthEvent
@@ -95,6 +96,11 @@ fun MainScreen() {
                         mainViewModel.navigateTo(
                             destination = AppRoute.Clock
                         )
+                    },
+                    onNavigateToInventory = {
+                        mainViewModel.navigateTo(
+                            destination = AppRoute.Inventory
+                        )
                     }
                 )
             }
@@ -102,6 +108,13 @@ fun MainScreen() {
                 ClockScreen(
                     onNavigateBack = {
                        mainViewModel.navigateBack()
+                    }
+                )
+            }
+            composable<AppRoute.Inventory> {
+                InventoryScreen(
+                    onNavigateBack = {
+                        mainViewModel.navigateBack()
                     }
                 )
             }

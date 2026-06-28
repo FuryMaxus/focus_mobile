@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
+import androidx.compose.material.icons.filled.Inventory
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -41,7 +42,8 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
     onNavigateToAuthEntry: () -> Unit,
-    onNavigateToClock: () -> Unit
+    onNavigateToClock: () -> Unit,
+    onNavigateToInventory: () -> Unit
 ) {
 
     val nivel       by viewModel.nivel.collectAsState()
@@ -73,6 +75,13 @@ fun HomeScreen(
                     containerColor = DungeonNoir700
                 ),
                 actions = {
+                    IconButton(onClick = onNavigateToInventory) {
+                        Icon(
+                            imageVector = Icons.Filled.Inventory,
+                            contentDescription = "Inventario",
+                            tint = AncientGold
+                        )
+                    }
                     IconButton(
                         onClick = {
                             viewModel.logout(onLogoutSuccess = { onNavigateToAuthEntry() })

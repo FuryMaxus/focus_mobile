@@ -18,11 +18,13 @@ class UserPreferences @Inject constructor(
     private val TOKEN_KEY = stringPreferencesKey("jwt_token")
     private val LEVEL_KEY = intPreferencesKey("user_level")
     private val TOTAL_EXP_KEY = intPreferencesKey("toal_user_exp")
+    private val CHARACTER_KEY = stringPreferencesKey("selected_character")
 
 
     val getToken: Flow<String?> = dataStore.data.map { it[TOKEN_KEY] }
     val getLevel: Flow<Int> = dataStore.data.map { it[LEVEL_KEY] ?: 1 }
     val getExp: Flow<Int> = dataStore.data.map { it[TOTAL_EXP_KEY] ?: 0 }
+    val getCharacter: Flow<String> = dataStore.data.map { it[CHARACTER_KEY] ?: "Duende" }
 
     var cachedToken: String? = null
         private set
@@ -30,6 +32,9 @@ class UserPreferences @Inject constructor(
     suspend fun saveToken(token: String) {
         dataStore.edit { it[TOKEN_KEY] = token }
         cachedToken = token
+    }
+    suspend fun saveCharacter(name: String) {
+        dataStore.edit { it[CHARACTER_KEY] = name }
     }
     suspend fun saveLevelAndExp(level: Int, exp: Int) {
         dataStore.edit {
