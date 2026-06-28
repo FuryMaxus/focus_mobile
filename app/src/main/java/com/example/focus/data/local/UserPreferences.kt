@@ -19,10 +19,12 @@ class UserPreferences @Inject constructor(
     private val LEVEL_KEY = intPreferencesKey("user_level")
     private val TOTAL_EXP_KEY = intPreferencesKey("toal_user_exp")
 
+    private val CURRENT_ROOM_ID = stringPreferencesKey("current_room_id")
 
     val getToken: Flow<String?> = dataStore.data.map { it[TOKEN_KEY] }
     val getLevel: Flow<Int> = dataStore.data.map { it[LEVEL_KEY] ?: 1 }
     val getExp: Flow<Int> = dataStore.data.map { it[TOTAL_EXP_KEY] ?: 0 }
+    val getCurrentRoomId: Flow<String?> = dataStore.data.map { it[CURRENT_ROOM_ID] }
 
     var cachedToken: String? = null
         private set
@@ -37,8 +39,17 @@ class UserPreferences @Inject constructor(
             it[TOTAL_EXP_KEY] = exp
         }
     }
+
     suspend fun clearSession() {
         dataStore.edit { it.clear() }
         cachedToken = null
+    }
+
+    suspend fun saveCurrentRoom(roomId: String) {
+        dataStore.edit { it[CURRENT_ROOM_ID] = roomId }
+    }
+
+    suspend fun clearCurrentRoom() {
+        dataStore.edit { it.remove(CURRENT_ROOM_ID) }
     }
 }
