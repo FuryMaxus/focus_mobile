@@ -1,8 +1,12 @@
 package com.example.focus.network
 
+import com.example.focus.data.remote.JoinRoomPayload
 import com.example.focus.data.remote.LoginPayload
+import com.example.focus.data.remote.MemberResponseDto
 import com.example.focus.data.remote.RegisterPayload
 import com.example.focus.data.remote.RegisterResponse
+import com.example.focus.data.remote.RoomCreatePayload
+import com.example.focus.data.remote.RoomResponseDto
 import com.example.focus.data.remote.SyncPayload
 import com.example.focus.data.remote.SyncResponse
 import com.example.focus.data.remote.TokenResponse
@@ -24,4 +28,15 @@ interface ApiService {
 
     @GET("api/v1/users/me/stats")
     suspend fun getUserStats(): UserStatsDto
+
+    @GET("api/v1/rooms/")
+    suspend fun getRooms(): List<RoomResponseDto>
+
+    @POST("api/v1/rooms/")
+    suspend fun createRoom(@Body payload: RoomCreatePayload): RoomResponseDto
+
+    @POST("api/v1/rooms/join")
+    suspend fun joinRoom(@Body payload: JoinRoomPayload): MemberResponseDto
+
+    //TODO: add the rest if needed
 }
