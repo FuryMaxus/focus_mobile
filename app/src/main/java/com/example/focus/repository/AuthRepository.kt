@@ -35,9 +35,9 @@ class AuthRepository @Inject constructor(
         }
     }
 
-    suspend fun register(email: String, password: String): Result<String> {
+    suspend fun register(email: String, password: String, role: String): Result<String> {
         return try {
-            val payload = RegisterPayload(email = email, password = password)
+            val payload = RegisterPayload(email = email, password = password, role = role)
             val response = apiService.register(payload)
             Result.success(response.id)
         } catch (e: Exception) {
