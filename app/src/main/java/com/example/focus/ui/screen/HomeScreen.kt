@@ -31,15 +31,25 @@ import com.example.focus.viewmodel.HomeViewModel
 import com.example.focus.ui.theme.*
 import com.example.focus.ui.component.GuildCard
 import com.example.focus.ui.component.GuildDivider
+import com.example.focus.ui.component.GuildCharacter
+import com.example.focus.ui.component.CharacterPose
+import com.example.focus.ui.component.AnimatedCharacter
 import com.example.focus.ui.component.RarityBadge
 import com.example.focus.ui.component.SectionLabel
+import androidx.compose.foundation.shape.CircleShape
+import com.example.focus.ui.component.LevelUpCelebration
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 
+
+import com.example.focus.viewmodel.ClockViewModel
+import com.example.focus.ui.component.LevelUpCelebration
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
+    clockViewModel: ClockViewModel = hiltViewModel(),
     onNavigateToAuthEntry: () -> Unit,
     onNavigateToClock: () -> Unit,
     onNavigateToRooms: () -> Unit, //temporal
@@ -49,6 +59,19 @@ fun HomeScreen(
     val expActual   by viewModel.expActual.collectAsState()
     val expFaltante by viewModel.expFaltante.collectAsState()
     val progreso    by viewModel.progreso.collectAsState()
+    val characterName by viewModel.character.collectAsState()
+    
+    val clockState by clockViewModel.state.collectAsState()
+    
+    var showLevelUp by remember { mutableStateOf(false) }
+    var lastLevel by remember { mutableStateOf(nivel) }
+    
+    LaunchedEffect(nivel) {
+        if (nivel > lastLevel) {
+            showLevelUp = true
+        }
+        lastLevel = nivel
+    }
 
     Scaffold(
         containerColor = DungeonNoir,
@@ -87,24 +110,6 @@ fun HomeScreen(
                     }
                 }
             )
-        },
-        floatingActionButton = {
-            ExtendedFloatingActionButton(
-                onClick = { onNavigateToClock() },
-                containerColor = AmberFlame,
-                contentColor   = InkBlack,
-                shape          = RoundedCornerShape(6.dp),
-                modifier       = Modifier.guildGlow(color = AmberFlame, radius = 20.dp, shape = RoundedCornerShape(6.dp), alpha = 0.6f),
-                icon = { Icon(Icons.Filled.PlayArrow, contentDescription = "Iniciar Misión") },
-                text = {
-                    Text(
-                        text = "INICIAR MISIÓN",
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.Bold
-                    )
-                },
-                elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 0.dp)
-            )
         }
     ) { paddingValues ->
 
@@ -140,11 +145,12 @@ fun HomeScreen(
 
                 // ── Pergamino de estadísticas ───────────────────
                 GuildCard(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth(0.85f),
                     glowColor = AncientGold700,
-                    animatedBorder = true
+                    animatedBorder = true,
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Column {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         SectionLabel("PERGAMINO DE ESTADÍSTICAS")
 
                         Spacer(modifier = Modifier.height(20.dp))
@@ -185,12 +191,28 @@ fun HomeScreen(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(20.dp))
+                // ── Visualización del Personaje (Ahora debajo de las estadísticas) ──
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(220.dp), // Ajustado ligeramente para no empujar tanto hacia abajo
+                    contentAlignment = Alignment.Center
+                ) {
+                    AnimatedCharacter(
+                        character = GuildCharacter.fromName(characterName),
+                        modifier = Modifier.size(190.dp),
+                        pose = CharacterPose.Idle
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(10.dp))
 
                 // ── Misión activa ───────────────────────────────
                 GuildCard(
                     modifier = Modifier.fillMaxWidth(),
-                    glow = false
+                    glow = clockState.isRunning,
+                    glowColor = AmberFlame,
+                    animatedBorder = clockState.isRunning
                 ) {
                     Column {
                         Row(
@@ -198,27 +220,62 @@ fun HomeScreen(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            SectionLabel("MISIÓN ACTIVA", color = AmberFlame)
-                            RarityBadge(text = "EN ESPERA", accent = SteelSilver500, fill = DungeonNoir500)
+                            SectionLabel("MISIÓN EN CURSO", color = if (clockState.isRunning) AmberFlame else SteelSilver500)
+                            RarityBadge(
+                                text = if (clockState.isRunning) "ACTIVA" else "EN ESPERA",
+                                accent = if (clockState.isRunning) AmberFlame else SteelSilver500,
+                                fill = DungeonNoir500
+                            )
                         }
-                        Spacer(modifier = Modifier.height(12.dp))
-                        Text(
-                            text = "Sin misión en curso",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = SteelSilver
-                        )
-                        Spacer(modifier = Modifier.height(2.dp))
-                        Text(
-                            text = "Pulsa INICIAR MISIÓN para comenzar una sesión de estudio y ganar XP.",
-                            style = MaterialTheme.typography.bodySmall.copy(fontStyle = FontStyle.Italic),
-                            color = SteelSilver500
-                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        
+                        if (clockState.isRunning) {
+                            val hours = clockState.timeInSeconds / 3600
+                            val minutes = (clockState.timeInSeconds % 3600) / 60
+                            val seconds = clockState.timeInSeconds % 60
+                            val timeStr = "%02d:%02d:%02d".format(hours, minutes, seconds)
+                            
+                            Column(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text(
+                                    text = timeStr,
+                                    style = MaterialTheme.typography.displayMedium,
+                                    color = AncientGold,
+                                    fontWeight = FontWeight.Black,
+                                    letterSpacing = 4.sp
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    text = "¡Sigue así, aventurero! La sabiduría te aguarda.",
+                                    style = MaterialTheme.typography.bodySmall.copy(fontStyle = FontStyle.Italic),
+                                    color = SteelSilver500
+                                )
+                            }
+                        } else {
+                            Text(
+                                text = "Sin misión en curso",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = SteelSilver
+                            )
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = "Ve a la pestaña MISIÓN para comenzar una sesión de estudio y ganar XP.",
+                                style = MaterialTheme.typography.bodySmall.copy(fontStyle = FontStyle.Italic),
+                                color = SteelSilver500
+                            )
+                        }
                     }
                 }
 
                 // Espacio para que el FAB no tape la última card
                 Spacer(modifier = Modifier.height(96.dp))
             }
+        }
+        
+        if (showLevelUp) {
+            LevelUpCelebration(level = nivel, onDismiss = { showLevelUp = false })
         }
 
     }

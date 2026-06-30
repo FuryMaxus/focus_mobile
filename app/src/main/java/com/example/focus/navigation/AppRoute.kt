@@ -20,4 +20,9 @@ sealed interface AppRoute {
     @Serializable data object Rooms : AppRoute
 
     @Serializable data object Inventory : AppRoute
+
+    // DM Routes
+    @Serializable data object DMPanel : AppRoute
+    @Serializable data object DMProfile : AppRoute
+    @Serializable data object DMCreateRoom : AppRoute
 }

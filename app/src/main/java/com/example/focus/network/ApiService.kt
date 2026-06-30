@@ -38,5 +38,9 @@ interface ApiService {
     @POST("api/v1/rooms/join")
     suspend fun joinRoom(@Body payload: JoinRoomPayload): MemberResponseDto
 
-    //TODO: add the rest if needed
+    @GET("api/v1/rooms/{roomId}/members")
+    suspend fun getRoomMembers(@retrofit2.http.Path("roomId") roomId: String): List<MemberResponseDto>
+
+    @POST("api/v1/rooms/{roomId}/end")
+    suspend fun endRoom(@retrofit2.http.Path("roomId") roomId: String): RoomResponseDto
 }

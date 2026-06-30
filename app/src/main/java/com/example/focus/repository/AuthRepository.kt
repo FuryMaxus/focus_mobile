@@ -4,6 +4,7 @@ import com.example.focus.data.local.UserPreferences
 import com.example.focus.data.remote.LoginPayload
 import com.example.focus.data.remote.RegisterPayload
 import com.example.focus.network.ApiService
+import com.example.focus.network.JwtUtils
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -20,6 +21,13 @@ class AuthRepository @Inject constructor(
 
             if (response.accessToken.isNotEmpty()) {
                 userPreferences.saveToken(response.accessToken)
+                
+                // Extraer el rol del token JWT y guardarlo
+                val role = JwtUtils.extractClaim(response.accessToken, "role")
+                if (role != null) {
+                    userPreferences.saveRole(role)
+                }
+
                 val stats = apiService.getUserStats()
                 userPreferences.saveLevelAndExp(
                     exp = stats.totalExp,

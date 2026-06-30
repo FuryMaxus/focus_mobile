@@ -41,6 +41,8 @@ import com.example.focus.ui.theme.DungeonNoir700
 import com.example.focus.ui.theme.InkBlack
 import com.example.focus.ui.screen.RoomsScreen
 import com.example.focus.ui.screen.InventoryScreen
+import com.example.focus.ui.screen.DMCreateRoomScreen
+import com.example.focus.ui.screen.DMPanelScreen
 import com.example.focus.ui.theme.animatedGoldBorder
 import com.example.focus.ui.theme.guildGlow
 import com.example.focus.ui.theme.ShieldShape
@@ -55,8 +57,13 @@ fun MainScreen() {
     val navController = rememberNavController()
     val mainViewModel: MainViewModel = hiltViewModel()
     val token by mainViewModel.token.collectAsState(initial = "LOADING")
+    val role by mainViewModel.role.collectAsState(initial = "student")
 
     HandleAppEffects(mainViewModel, navController)
+
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentDestination = navBackStackEntry?.destination
+    val isClockScreen = currentDestination?.hierarchy?.any { it.hasRoute(AppRoute.Clock::class) } == true
 
     if (token == "LOADING") {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = androidx.compose.ui.Alignment.Center) {
@@ -74,19 +81,31 @@ fun MainScreen() {
                 val currentDestination = navBackStackEntry?.destination
 
                 NavigationBar(
-                    containerColor = DungeonNoir700,
+                    containerColor = if (isClockScreen) Color.Transparent else DungeonNoir700,
                     contentColor = AncientGold,
-                    tonalElevation = 8.dp
+                    tonalElevation = if (isClockScreen) 0.dp else 8.dp
                 ) {
-                    val items = listOf(
-                        Triple(AppRoute.Home, Icons.Filled.HistoryEdu, "Tablón"),
-                        Triple(AppRoute.Inventory, Icons.Filled.Backpack, "Inventario"),
-                        Triple(AppRoute.Clock, Icons.Filled.MilitaryTech, "Misión"),
-                        Triple(AppRoute.Rooms, Icons.Filled.Castle, "Gremio")
-                    )
+                    val items = if (role == "dm") {
+                        listOf(
+                            Triple(AppRoute.Home, Icons.Filled.HistoryEdu, "Inicio"),
+                            Triple(AppRoute.DMPanel, Icons.Filled.Shield, "Gremios"),
+                            Triple(AppRoute.DMProfile, Icons.Filled.Person, "Perfil")
+                        )
+                    } else {
+                        listOf(
+                            Triple(AppRoute.Home, Icons.Filled.HistoryEdu, "Tablón"),
+                            Triple(AppRoute.Inventory, Icons.Filled.Backpack, "Inventario"),
+                            Triple(AppRoute.Clock, Icons.Filled.MilitaryTech, "Misión"),
+                            Triple(AppRoute.Rooms, Icons.Filled.Castle, "Gremio")
+                        )
+                    }
 
                     items.forEach { (route, icon, label) ->
                         val selected = currentDestination?.hierarchy?.any { it.hasRoute(route::class) } == true
+                        
+                        // Si estamos en la pantalla del reloj, ocultamos las etiquetas para que sea más limpio
+                        val showLabel = !isClockScreen
+
                         NavigationBarItem(
                             selected = selected,
                             onClick = {
@@ -117,11 +136,13 @@ fun MainScreen() {
                                     )
                                 }
                             },
-                            label = { Text(label, style = MaterialTheme.typography.labelSmall) },
+                            label = if (showLabel) {
+                                { Text(label, style = MaterialTheme.typography.labelSmall) }
+                            } else null,
                             colors = NavigationBarItemDefaults.colors(
                                 selectedIconColor = AncientGold,
                                 selectedTextColor = AncientGold,
-                                unselectedIconColor = AncientGold.copy(alpha = 0.6f),
+                                unselectedIconColor = AncientGold.copy(alpha = if (isClockScreen) 0.3f else 0.6f),
                                 unselectedTextColor = AncientGold.copy(alpha = 0.6f),
                                 indicatorColor = Color.Transparent
                             )
@@ -212,6 +233,27 @@ fun MainScreen() {
             }
             composable<AppRoute.Inventory> {
                 InventoryScreen(
+                    onNavigateBack = {
+                        mainViewModel.navigateBack()
+                    }
+                )
+            }
+
+            // --- Rutas del DM ---
+            composable<AppRoute.DMPanel> {
+                DMPanelScreen(
+                    onNavigateToCreateRoom = {
+                        mainViewModel.navigateTo(AppRoute.DMCreateRoom)
+                    }
+                )
+            }
+            composable<AppRoute.DMProfile> {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text("Perfil del DM (En construcción)", color = Color.White)
+                }
+            }
+            composable<AppRoute.DMCreateRoom> {
+                DMCreateRoomScreen(
                     onNavigateBack = {
                         mainViewModel.navigateBack()
                     }
