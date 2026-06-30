@@ -36,4 +36,20 @@ class RoomRepository @Inject constructor(
             Result.failure(e)
         }
     }
+
+    suspend fun fetchRoomMembers(roomId: String): Result<List<MemberResponseDto>> {
+        return try {
+            Result.success(apiService.getRoomMembers(roomId))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun closeRoom(roomId: String): Result<RoomResponseDto> {
+        return try {
+            Result.success(apiService.endRoom(roomId))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }

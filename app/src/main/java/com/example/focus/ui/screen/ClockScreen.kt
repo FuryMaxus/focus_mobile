@@ -22,6 +22,8 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -88,14 +90,58 @@ fun ClockScreen(
         label = "arc"
     )
 
+    // ── Lógica de Intensidad Dinámica Mejorada ───────
+    // Cada 10 segundos sube un escalón de intensidad (max 100 segundos para test)
+    val steps = (seconds / 10).coerceAtMost(10)
+    val intensityTarget = steps / 10f
+    
+    val intensity by animateFloatAsState(
+        targetValue = intensityTarget,
+        animationSpec = tween(2000, easing = LinearOutSlowInEasing),
+        label = "intensity"
+    )
+    
+    // Color dinámico: Ámbar -> Oro -> Rojo -> Púrpura Profundo
+    val dynamicGlowColor = when {
+        intensity < 0.3f -> androidx.compose.ui.graphics.lerp(AmberFlame, AncientGold, intensity * 3.3f)
+        intensity < 0.7f -> androidx.compose.ui.graphics.lerp(AncientGold, DragonRed, (intensity - 0.3f) * 2.5f)
+        else -> androidx.compose.ui.graphics.lerp(DragonRed, Color(0xFF6200EA), (intensity - 0.7f) * 3.3f)
+    }
+
+    // Efecto de Sacudida (Shake) MUCHO más rápido y agresivo
+    val shakeOffset by pulseAnim.animateFloat(
+        initialValue = -1.5f, targetValue = 1.5f,
+        animationSpec = infiniteRepeatable(
+            tween((60 / (0.6f + intensity)).toInt(), easing = LinearEasing), 
+            RepeatMode.Reverse
+        ),
+        label = "shake"
+    )
+    val currentShake = if (isRunning && intensity > 0.2f) (shakeOffset * (1f + intensity * 10f)) else 0f
+
     Scaffold(
-        containerColor = DungeonNoir,
+        containerColor = Color.Transparent,
         topBar = {
             TopAppBar(
                 title = {
                     Column {
                         Text("SESIÓN DE ESTUDIO", style = MaterialTheme.typography.titleLarge, color = AncientGold)
-                        Text("Misión en curso", style = MaterialTheme.typography.labelSmall, color = SteelSilver500, letterSpacing = 1.sp)
+                        Text("Intensidad: ${(intensity * 100).toInt()}%", style = MaterialTheme.typography.labelSmall, color = dynamicGlowColor, fontWeight = FontWeight.Bold)
+                    }
+                },
+                actions = {
+                    if (intensity > 0.4f) {
+                        val combo = when {
+                            intensity > 0.8f -> "COMBO X3"
+                            intensity > 0.5f -> "COMBO X2"
+                            else -> ""
+                        }
+                        Text(
+                            text = combo,
+                            color = dynamicGlowColor,
+                            fontWeight = FontWeight.Black,
+                            modifier = Modifier.padding(end = 16.dp).guildGlow(color = dynamicGlowColor, radius = 4.dp)
+                        )
                     }
                 },
                 navigationIcon = {
@@ -103,19 +149,40 @@ fun ClockScreen(
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Atrás", tint = SteelSilver)
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = DungeonNoir700)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
             )
         }
     ) { paddingValues ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Brush.verticalGradient(colors = listOf(DungeonNoir700, DungeonNoir, InkBlack)))
-                .padding(paddingValues)
+                .background(InkBlack)
         ) {
+            // Fondo dinámico con resplandor radial expandido (Vignette Mágica)
+            Canvas(modifier = Modifier.fillMaxSize()) {
+                val centerOffset = Offset(size.width / 2, size.height * 0.4f)
+                drawRect(
+                    brush = Brush.radialGradient(
+                        colors = listOf(
+                            dynamicGlowColor.copy(alpha = 0.1f + (intensity * 0.3f)),
+                            Color.Transparent
+                        ),
+                        center = centerOffset,
+                        radius = size.maxDimension * (0.4f + intensity * 0.6f)
+                    )
+                )
+            }
+
+            if (isRunning) {
+                // Partículas que flotan por toda la pantalla
+                FullScreenEpicParticles(intensity = intensity, color = dynamicGlowColor)
+            }
+
             Column(
                 modifier = Modifier
                     .fillMaxSize()
+                    .padding(paddingValues) // Aplicamos el padding aquí dentro para que el TopBar sea transparente sobre el fondo
+                    .offset(x = currentShake.dp, y = currentShake.dp)
                     .padding(horizontal = 24.dp, vertical = 16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceBetween
@@ -126,14 +193,15 @@ fun ClockScreen(
                     modifier = Modifier.weight(1f),
                     isRunning = isRunning,
                     seconds = seconds,
-                    pulseScale = pulseScale,
-                    runeRotation = runeRotation,
+                    pulseScale = pulseScale + (intensity * 0.12f), // Pulso mucho más grande
+                    runeRotation = runeRotation * (1f + intensity), // Gira más rápido
                     glowAlpha = glowAlpha,
                     arcProgressAnim = arcProgressAnim,
                     particle1Y = particle1Y,
                     particle2Y = particle2Y,
                     particle3Y = particle3Y,
-                    particleAlpha = particleAlpha
+                    particleAlpha = particleAlpha,
+                    glowColor = dynamicGlowColor
                 )
 
                 QuoteBanner(isRunning = isRunning)
@@ -174,7 +242,8 @@ private fun ClockDisplay(
     particle1Y: Float,
     particle2Y: Float,
     particle3Y: Float,
-    particleAlpha: Float
+    particleAlpha: Float,
+    glowColor: androidx.compose.ui.graphics.Color = AmberFlame
 ) {
     Box(
         contentAlignment = Alignment.Center,
@@ -185,7 +254,8 @@ private fun ClockDisplay(
                 particle1Y = particle1Y,
                 particle2Y = particle2Y,
                 particle3Y = particle3Y,
-                alpha = particleAlpha
+                alpha = particleAlpha,
+                color = glowColor
             )
         }
 
@@ -455,7 +525,8 @@ private fun FireParticles(
     particle1Y: Float,
     particle2Y: Float,
     particle3Y: Float,
-    alpha: Float
+    alpha: Float,
+    color: androidx.compose.ui.graphics.Color = AmberFlame
 ) {
     Box(
         modifier = Modifier.size(280.dp),
@@ -464,7 +535,53 @@ private fun FireParticles(
         Box(modifier = Modifier.offset(x = (-80).dp, y = particle1Y.dp).alpha(alpha)) { Text("🔥", fontSize = 14.sp) }
         Box(modifier = Modifier.offset(x = 0.dp, y = (particle2Y - 100).dp).alpha(alpha * 0.6f)) { Text("✨", fontSize = 10.sp) }
         Box(modifier = Modifier.offset(x = 80.dp, y = particle3Y.dp).alpha(alpha)) { Text("🔥", fontSize = 12.sp) }
-        Box(modifier = Modifier.offset(x = (-40).dp, y = (particle1Y - 80).dp).alpha(alpha * 0.5f)) { Text("✦", fontSize = 8.sp, color = AncientGold) }
-        Box(modifier = Modifier.offset(x = 40.dp, y = (particle3Y - 70).dp).alpha(alpha * 0.5f)) { Text("✦", fontSize = 8.sp, color = AncientGold) }
+        Box(modifier = Modifier.offset(x = (-40).dp, y = (particle1Y - 80).dp).alpha(alpha * 0.5f)) { Text("✦", fontSize = 8.sp, color = color) }
+        Box(modifier = Modifier.offset(x = 40.dp, y = (particle3Y - 70).dp).alpha(alpha * 0.5f)) { Text("✦", fontSize = 8.sp, color = color) }
     }
+}
+
+@Composable
+private fun FullScreenEpicParticles(intensity: Float, color: Color) {
+    val transition = rememberInfiniteTransition(label = "epicParticles")
+    
+    // Generamos varias partículas con diferentes trayectorias
+    val p1Offset by transition.animateFloat(
+        initialValue = 0f, targetValue = 1f,
+        animationSpec = infiniteRepeatable(tween(4000, easing = LinearEasing)),
+        label = "ep1"
+    )
+    val p2Offset by transition.animateFloat(
+        initialValue = 0f, targetValue = 1f,
+        animationSpec = infiniteRepeatable(tween(3000, easing = LinearEasing)),
+        label = "ep2"
+    )
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        // Partícula 1: Sube por la izquierda
+        Box(modifier = Modifier
+            .align(Alignment.BottomStart)
+            .offset(x = 40.dp, y = (-(1000 * p1Offset)).dp)
+            .alpha((1f - p1Offset) * intensity)
+        ) { Text("🔥", fontSize = (14 + intensity * 10).sp) }
+
+        // Partícula 2: Sube por la derecha
+        Box(modifier = Modifier
+            .align(Alignment.BottomEnd)
+            .offset(x = (-40).dp, y = (-(1000 * p2Offset)).dp)
+            .alpha((1f - p2Offset) * intensity)
+        ) { Text("✨", fontSize = (12 + intensity * 10).sp) }
+
+        // Orbes de poder que aparecen con intensidad alta
+        if (intensity > 0.6f) {
+            Box(modifier = Modifier
+                .align(Alignment.Center)
+                .offset(x = (if (p1Offset > 0.5f) 120 else -120).dp, y = (shake((p1Offset * 2000).toInt(), 100)).dp)
+                .alpha((intensity - 0.6f) * 2f)
+            ) { Text("✦", fontSize = 20.sp, color = color) }
+        }
+    }
+}
+
+private fun shake(time: Int, amplitude: Int): Float {
+    return (kotlin.math.sin(time.toDouble() / 50.0) * amplitude).toFloat()
 }

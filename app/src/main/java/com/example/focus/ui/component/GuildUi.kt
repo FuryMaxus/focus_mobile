@@ -72,6 +72,7 @@ fun GuildCard(
     glowColor: Color = AncientGold700,
     animatedBorder: Boolean = false,
     contentPadding: PaddingValues = PaddingValues(20.dp),
+    horizontalAlignment: Alignment.Horizontal = Alignment.Start,
     content: @Composable () -> Unit
 ) {
     val base = modifier
@@ -86,7 +87,9 @@ fun GuildCard(
     }
 
     Box(modifier = bordered.padding(contentPadding)) {
-        content()
+        Column(horizontalAlignment = horizontalAlignment) {
+            content()
+        }
     }
 }
 

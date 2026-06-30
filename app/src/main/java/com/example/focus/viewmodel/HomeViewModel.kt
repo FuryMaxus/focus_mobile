@@ -23,6 +23,13 @@ class HomeViewModel @Inject constructor(
             initialValue = 1
         )
 
+    val character: StateFlow<String> = userPreferences.getCharacter
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = "Duende"
+        )
+
     val expActual: StateFlow<Int> = userPreferences.getExp
         .stateIn(
             scope = viewModelScope,
