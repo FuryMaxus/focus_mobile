@@ -49,9 +49,9 @@ class RoomViewModel @Inject constructor(
         }
     }
 
-    fun equipRoom(roomId: String) {
+    fun equipRoom(room: RoomResponseDto) {
         viewModelScope.launch {
-            userPreferences.equipRoom(roomId)
+            userPreferences.equipRoom(room.id, room.xpMultiplier)
         }
     }
 

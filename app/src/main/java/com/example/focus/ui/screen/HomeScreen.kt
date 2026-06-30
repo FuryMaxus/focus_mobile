@@ -29,7 +29,8 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
     onNavigateToAuthEntry: () -> Unit,
-    onNavigateToClock: () -> Unit
+    onNavigateToClock: () -> Unit,
+    onNavigateToRooms: () -> Unit, //temporal
 ) {
 
 
@@ -262,9 +263,13 @@ fun HomeScreen(
                         style = MaterialTheme.typography.bodySmall.copy(fontStyle = FontStyle.Italic),
                         color = SteelSilver500
                     )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Button(onClick = onNavigateToRooms, content = {Text("Salas")})
+
                 }
             }
         }
+
     }
 }
 

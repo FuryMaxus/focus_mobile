@@ -3,6 +3,7 @@ package com.example.focus.data.local
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import jakarta.inject.Inject
@@ -19,6 +20,7 @@ class UserPreferences @Inject constructor(
     private val LEVEL_KEY = intPreferencesKey("user_level")
     private val TOTAL_EXP_KEY = intPreferencesKey("toal_user_exp")
     private val EQUIPPED_ROOM_ID = stringPreferencesKey("equipped_room_id")
+    private val EQUIPPED_ROOM_MULTIPLIER = floatPreferencesKey("equipped_room_multiplier")
     private val USER_ROLE = stringPreferencesKey("user_role")
 
     val getToken: Flow<String?> = dataStore.data.map { it[TOKEN_KEY] }
@@ -27,6 +29,10 @@ class UserPreferences @Inject constructor(
 
     val getEquippedRoomId: Flow<String?> = dataStore.data.map { preferences ->
         preferences[EQUIPPED_ROOM_ID]
+    }
+
+    val getEquippedRoomMultiplier: Flow<Float> = dataStore.data.map { preferences ->
+        preferences[EQUIPPED_ROOM_MULTIPLIER] ?: 1.0f
     }
 
     val getUserRole: Flow<String?> = dataStore.data.map { it[USER_ROLE] }
@@ -50,15 +56,17 @@ class UserPreferences @Inject constructor(
         cachedToken = null
     }
 
-    suspend fun equipRoom(roomId: String) {
+    suspend fun equipRoom(roomId: String, multiplier: Float) {
         dataStore.edit { preferences ->
             preferences[EQUIPPED_ROOM_ID] = roomId
+            preferences[EQUIPPED_ROOM_MULTIPLIER] = multiplier
         }
     }
 
     suspend fun unequipRoom() {
         dataStore.edit { preferences ->
             preferences.remove(EQUIPPED_ROOM_ID)
+            preferences.remove(EQUIPPED_ROOM_MULTIPLIER)
         }
     }
 

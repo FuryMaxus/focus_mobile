@@ -17,5 +17,5 @@ sealed interface AppRoute {
 
     @Serializable data object Register : AppRoute
 
-    @Serializable data object Group : AppRoute
+    @Serializable data object Rooms : AppRoute
 }

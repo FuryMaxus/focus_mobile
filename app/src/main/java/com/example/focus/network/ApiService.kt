@@ -24,7 +24,7 @@ interface ApiService {
     suspend fun register(@Body payload: RegisterPayload): RegisterResponse
 
     @POST("api/v1/sync")
-    suspend fun syncSessions(@Body payload: SyncPayload): Response<SyncResponse>
+    suspend fun syncSessions(@Body payload: SyncPayload): SyncResponse
 
     @GET("api/v1/users/me/stats")
     suspend fun getUserStats(): UserStatsDto

@@ -15,22 +15,14 @@ class UserStatsRepository @Inject constructor(
 ) {
     suspend fun syncBatchSessions(payload: SyncPayload): Result<SyncResponse> {
         return try {
-            val response = apiService.syncSessions(payload)
 
-            if (response.isSuccessful) {
-                val syncData = response.body()
-                if (syncData != null) {
-                    userPreferences.saveLevelAndExp(
-                        level = syncData.currentLevel,
-                        exp = syncData.totalExp
-                    )
-                    Result.success(syncData)
-                } else {
-                    Result.failure(Exception("El servidor respondió sin datos (Body nulo)"))
-                }
-            } else {
-                Result.failure(Exception("Error HTTP: ${response.code()}"))
-            }
+            val syncData = apiService.syncSessions(payload)
+
+            userPreferences.saveLevelAndExp(
+                level = syncData.currentLevel,
+                exp = syncData.totalExp
+            )
+            Result.success(syncData)
         } catch (e: Exception) {
             Result.failure(e)
         }

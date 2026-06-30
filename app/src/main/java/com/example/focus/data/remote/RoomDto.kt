@@ -30,7 +30,9 @@ data class RoomResponseDto(
     val invitationCode: String? = null,
     val qrCode: String? = null,
     val startedAt: String? = null,
-    val endedAt: String? = null
+    val endedAt: String? = null,
+    val validFromTime: String? = null,
+    val validUntilTime: String? = null
 )
 
 @Serializable
