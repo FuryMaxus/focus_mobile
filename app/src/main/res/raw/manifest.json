@@ -1,0 +1,166 @@
+[
+  {
+    "slug": "demonio_morado",
+    "label": "Demonio morado",
+    "w": 942,
+    "h": 984,
+    "rig": true,
+    "rigw": 942,
+    "righ": 1014,
+    "combow": 988,
+    "comboh": 984,
+    "modes": {
+      "jump": [
+        988,
+        1073
+      ],
+      "celebrate": [
+        1002,
+        1014
+      ],
+      "sleep": [
+        972,
+        984
+      ],
+      "combo": [
+        1002,
+        984
+      ],
+      "walk": [
+        942,
+        984
+      ],
+      "rig": [
+        942,
+        1014
+      ],
+      "idle": [
+        942,
+        984
+      ]
+    }
+  },
+  {
+    "slug": "dragon_rojo",
+    "label": "Dragón rojo",
+    "w": 942,
+    "h": 947,
+    "rig": true,
+    "rigw": 942,
+    "righ": 974,
+    "combow": 988,
+    "comboh": 945,
+    "modes": {
+      "jump": [
+        988,
+        1031
+      ],
+      "celebrate": [
+        1002,
+        974
+      ],
+      "sleep": [
+        972,
+        945
+      ],
+      "combo": [
+        1002,
+        945
+      ],
+      "walk": [
+        942,
+        947
+      ],
+      "rig": [
+        942,
+        974
+      ],
+      "idle": [
+        942,
+        947
+      ]
+    }
+  },
+  {
+    "slug": "duende_verde",
+    "label": "Duende verde",
+    "w": 942,
+    "h": 957,
+    "rig": true,
+    "rigw": 942,
+    "righ": 985,
+    "combow": 988,
+    "comboh": 957,
+    "modes": {
+      "jump": [
+        988,
+        1044
+      ],
+      "celebrate": [
+        1002,
+        986
+      ],
+      "sleep": [
+        972,
+        957
+      ],
+      "combo": [
+        1002,
+        957
+      ],
+      "walk": [
+        942,
+        957
+      ],
+      "rig": [
+        942,
+        985
+      ],
+      "idle": [
+        942,
+        957
+      ]
+    }
+  },
+  {
+    "slug": "cavernicola",
+    "label": "Cavernícola",
+    "w": 942,
+    "h": 992,
+    "rig": true,
+    "rigw": 942,
+    "righ": 1022,
+    "combow": 988,
+    "comboh": 992,
+    "modes": {
+      "jump": [
+        988,
+        1082
+      ],
+      "celebrate": [
+        1002,
+        1022
+      ],
+      "sleep": [
+        972,
+        992
+      ],
+      "combo": [
+        1002,
+        992
+      ],
+      "walk": [
+        942,
+        992
+      ],
+      "rig": [
+        942,
+        1022
+      ],
+      "idle": [
+        942,
+        992
+      ]
+    }
+  }
+]

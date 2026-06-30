@@ -34,18 +34,12 @@ import androidx.compose.ui.unit.sp
 // Cinzel tiene serifas inspiradas en la Roma clásica y encaja
 // perfectamente con la estética D&D. Más legible que MedievalSharp
 // en tamaños pequeños.
-val CinzelFamily = FontFamily(
-    Font(resId = com.example.focus.R.font.cinzel_regular, weight = FontWeight.Normal),
-    Font(resId = com.example.focus.R.font.cinzel_bold,    weight = FontWeight.Bold)
-)
+val CinzelFamily = FontFamily.Default // Fallback temporal
 
 // ── Familia de cuerpo: IM Fell English ─────────────────────────
 // Simula un texto impreso en una imprenta antigua. Perfecto para
 // descripciones de misiones, diálogos, labels de stats.
-val ImFellFamily = FontFamily(
-    Font(resId = com.example.focus.R.font.im_fell_english_regular, weight = FontWeight.Normal),
-    Font(resId = com.example.focus.R.font.im_fell_english_italic,  weight = FontWeight.Normal, style = FontStyle.Italic)
-)
+val ImFellFamily = FontFamily.Serif // Fallback temporal
 
 // ── Typography de Material 3 ────────────────────────────────────
 val FocusTypography = Typography(

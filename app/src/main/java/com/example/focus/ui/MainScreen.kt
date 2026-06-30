@@ -21,7 +21,32 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.focus.network.AuthEvent
 import com.example.focus.ui.screen.AuthEntryScreen
+import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Shield
+import androidx.compose.material.icons.filled.Backpack
+import androidx.compose.material.icons.filled.Castle
+import androidx.compose.material.icons.filled.HistoryEdu
+import androidx.compose.material.icons.filled.MilitaryTech
+import androidx.navigation.NavDestination.Companion.hasRoute
+import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import com.example.focus.ui.theme.AncientGold
+import com.example.focus.ui.theme.DungeonNoir700
+import com.example.focus.ui.theme.InkBlack
 import com.example.focus.ui.screen.RoomsScreen
+import com.example.focus.ui.screen.InventoryScreen
+import com.example.focus.ui.theme.animatedGoldBorder
+import com.example.focus.ui.theme.guildGlow
+import com.example.focus.ui.theme.ShieldShape
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.Alignment
+import androidx.compose.foundation.shape.CircleShape
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -34,17 +59,84 @@ fun MainScreen() {
     HandleAppEffects(mainViewModel, navController)
 
     if (token == "LOADING") {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = androidx.compose.ui.Alignment.Center) {
+            CircularProgressIndicator()
+        }
         return
     }
 
     val startRoute = if (token.isNullOrEmpty()) AppRoute.Menu else AppRoute.Home
 
-    Scaffold { innerPadding ->
+    Scaffold(
+        bottomBar = {
+            if (!token.isNullOrEmpty()) {
+                val navBackStackEntry by navController.currentBackStackEntryAsState()
+                val currentDestination = navBackStackEntry?.destination
+
+                NavigationBar(
+                    containerColor = DungeonNoir700,
+                    contentColor = AncientGold,
+                    tonalElevation = 8.dp
+                ) {
+                    val items = listOf(
+                        Triple(AppRoute.Home, Icons.Filled.HistoryEdu, "Tablón"),
+                        Triple(AppRoute.Inventory, Icons.Filled.Backpack, "Inventario"),
+                        Triple(AppRoute.Clock, Icons.Filled.MilitaryTech, "Misión"),
+                        Triple(AppRoute.Rooms, Icons.Filled.Castle, "Gremio")
+                    )
+
+                    items.forEach { (route, icon, label) ->
+                        val selected = currentDestination?.hierarchy?.any { it.hasRoute(route::class) } == true
+                        NavigationBarItem(
+                            selected = selected,
+                            onClick = {
+                                navController.navigate(route) {
+                                    popUpTo(navController.graph.findStartDestination().id) {
+                                        saveState = true
+                                    }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            },
+                            icon = { 
+                                Box(
+                                    modifier = if (selected) {
+                                        Modifier
+                                            .size(56.dp)
+                                            .animatedGoldBorder(width = 1.5.dp, shape = CircleShape)
+                                            .guildGlow(color = AncientGold, radius = 12.dp, shape = CircleShape, alpha = 0.5f)
+                                    } else {
+                                        Modifier.size(56.dp)
+                                    },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = icon, 
+                                        contentDescription = label,
+                                        modifier = Modifier.size(32.dp)
+                                    )
+                                }
+                            },
+                            label = { Text(label, style = MaterialTheme.typography.labelSmall) },
+                            colors = NavigationBarItemDefaults.colors(
+                                selectedIconColor = AncientGold,
+                                selectedTextColor = AncientGold,
+                                unselectedIconColor = AncientGold.copy(alpha = 0.6f),
+                                unselectedTextColor = AncientGold.copy(alpha = 0.6f),
+                                indicatorColor = Color.Transparent
+                            )
+                        )
+                    }
+                }
+            }
+        }
+    ) { innerPadding ->
         NavHost(
             navController = navController,
             startDestination = startRoute,
             modifier = Modifier.padding(innerPadding)
         ) {
+            // ... (dentro de NavHost)
 
             composable<AppRoute.Menu> {
                 AuthEntryScreen(
@@ -113,6 +205,13 @@ fun MainScreen() {
             }
             composable<AppRoute.Rooms> {
                 RoomsScreen(
+                    onNavigateBack = {
+                        mainViewModel.navigateBack()
+                    }
+                )
+            }
+            composable<AppRoute.Inventory> {
+                InventoryScreen(
                     onNavigateBack = {
                         mainViewModel.navigateBack()
                     }

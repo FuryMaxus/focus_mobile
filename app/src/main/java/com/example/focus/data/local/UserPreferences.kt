@@ -22,6 +22,7 @@ class UserPreferences @Inject constructor(
     private val EQUIPPED_ROOM_ID = stringPreferencesKey("equipped_room_id")
     private val EQUIPPED_ROOM_MULTIPLIER = floatPreferencesKey("equipped_room_multiplier")
     private val USER_ROLE = stringPreferencesKey("user_role")
+    private val CHARACTER_KEY = stringPreferencesKey("selected_character")
 
     val getToken: Flow<String?> = dataStore.data.map { it[TOKEN_KEY] }
     val getLevel: Flow<Int> = dataStore.data.map { it[LEVEL_KEY] ?: 1 }
@@ -36,6 +37,8 @@ class UserPreferences @Inject constructor(
     }
 
     val getUserRole: Flow<String?> = dataStore.data.map { it[USER_ROLE] }
+
+    val getCharacter: Flow<String> = dataStore.data.map { it[CHARACTER_KEY] ?: "Duende" }
 
     var cachedToken: String? = null
         private set
@@ -72,5 +75,9 @@ class UserPreferences @Inject constructor(
 
     suspend fun saveRole(role: String) {
         dataStore.edit { it[USER_ROLE] = role }
+    }
+
+    suspend fun saveCharacter(name: String) {
+        dataStore.edit { it[CHARACTER_KEY] = name }
     }
 }

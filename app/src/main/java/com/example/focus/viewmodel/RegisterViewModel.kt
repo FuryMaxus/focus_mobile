@@ -21,6 +21,9 @@ class RegisterViewModel @Inject constructor(
     private val _password = MutableStateFlow("")
     val password: StateFlow<String> = _password.asStateFlow()
 
+    private val _role = MutableStateFlow("student") // Default role
+    val role: StateFlow<String> = _role.asStateFlow()
+
     private val _mensaje = MutableStateFlow("")
     val mensaje: StateFlow<String> = _mensaje.asStateFlow()
 
@@ -32,6 +35,7 @@ class RegisterViewModel @Inject constructor(
 
     fun onEmailChange(newEmail: String) { _email.value = newEmail }
     fun onPasswordChange(newPassword: String) { _password.value = newPassword }
+    fun onRoleChange(newRole: String) { _role.value = newRole }
 
     fun register(onSuccess: () -> Unit) {
         if (_email.value.isBlank() || _password.value.isBlank()) {
@@ -49,7 +53,8 @@ class RegisterViewModel @Inject constructor(
                 email =_email.value
                     .trim(),
                 password = _password.value
-                    .trim()
+                    .trim(),
+                role = _role.value
             ).fold(
                 onSuccess = {
                     _mensaje.value = "¡Registro exitoso!"

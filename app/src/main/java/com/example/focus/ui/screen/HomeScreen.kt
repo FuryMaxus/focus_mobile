@@ -1,7 +1,16 @@
 package com.example.focus.ui.screen
 
+import androidx.compose.animation.core.EaseInOutSine
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -20,7 +29,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.focus.viewmodel.HomeViewModel
 import com.example.focus.ui.theme.*
-import com.example.focus.ui.component.OrnamentalDivider
+import com.example.focus.ui.component.GuildCard
+import com.example.focus.ui.component.GuildDivider
+import com.example.focus.ui.component.RarityBadge
+import com.example.focus.ui.component.SectionLabel
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 
 
@@ -33,12 +45,10 @@ fun HomeScreen(
     onNavigateToRooms: () -> Unit, //temporal
 ) {
 
-
-    val nivel      by viewModel.nivel.collectAsState()
-    val expActual  by viewModel.expActual.collectAsState()
+    val nivel       by viewModel.nivel.collectAsState()
+    val expActual   by viewModel.expActual.collectAsState()
     val expFaltante by viewModel.expFaltante.collectAsState()
-    val progreso   by viewModel.progreso.collectAsState()
-    // ────────────────────────────────────────────────────────────
+    val progreso    by viewModel.progreso.collectAsState()
 
     Scaffold(
         containerColor = DungeonNoir,
@@ -47,15 +57,16 @@ fun HomeScreen(
                 title = {
                     Column {
                         Text(
-                            text = "FOCUS MOBILE",
+                            text = "FOCUS",
                             style = MaterialTheme.typography.titleLarge,
-                            color = AncientGold
+                            color = AncientGold,
+                            letterSpacing = 2.sp
                         )
                         Text(
-                            text = "Tablón de Misiones",
+                            text = "TABLÓN DE MISIONES",
                             style = MaterialTheme.typography.labelSmall,
                             color = SteelSilver500,
-                            letterSpacing = 1.sp
+                            letterSpacing = 2.sp
                         )
                     }
                 },
@@ -65,9 +76,7 @@ fun HomeScreen(
                 actions = {
                     IconButton(
                         onClick = {
-                            viewModel.logout(onLogoutSuccess = {
-                                onNavigateToAuthEntry()
-                            })
+                            viewModel.logout(onLogoutSuccess = { onNavigateToAuthEntry() })
                         }
                     ) {
                         Icon(
@@ -84,10 +93,9 @@ fun HomeScreen(
                 onClick = { onNavigateToClock() },
                 containerColor = AmberFlame,
                 contentColor   = InkBlack,
-                shape          = RoundedCornerShape(4.dp),
-                icon = {
-                    Icon(Icons.Filled.PlayArrow, contentDescription = "Iniciar Misión")
-                },
+                shape          = RoundedCornerShape(6.dp),
+                modifier       = Modifier.guildGlow(color = AmberFlame, radius = 20.dp, shape = RoundedCornerShape(6.dp), alpha = 0.6f),
+                icon = { Icon(Icons.Filled.PlayArrow, contentDescription = "Iniciar Misión") },
                 text = {
                     Text(
                         text = "INICIAR MISIÓN",
@@ -95,181 +103,165 @@ fun HomeScreen(
                         fontWeight = FontWeight.Bold
                     )
                 },
-                elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 8.dp)
+                elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 0.dp)
             )
         }
     ) { paddingValues ->
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(DungeonNoir700, DungeonNoir, InkBlack)
-                    )
-                )
-                .padding(paddingValues)
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-
-            Text(
-                text = "¡Aventura a la vista!",
-                style = MaterialTheme.typography.headlineMedium,
-                color = AncientGold,
-                textAlign = TextAlign.Center
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = "Prepara tu equipamiento, la mazmorra te aguarda.",
-                style = MaterialTheme.typography.bodyMedium.copy(fontStyle = FontStyle.Italic),
-                color = SteelSilver500,
-                textAlign = TextAlign.Center
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-            OrnamentalDivider()
-            Spacer(modifier = Modifier.height(20.dp))
-
-            // ── Card de estadísticas ────────────────────────────
-            Box(
+        DungeonBackground {
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(6.dp))
-                    .background(DungeonNoir700)
-                    .border(
-                        width = 1.dp,
-                        brush = Brush.linearGradient(
-                            colors = listOf(SaddleBrown, AncientGold700, SaddleBrown)
-                        ),
-                        shape = RoundedCornerShape(6.dp)
-                    )
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(paddingValues)
+                    .padding(horizontal = 16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Column(modifier = Modifier.padding(20.dp)) {
 
-                    // Header de la card
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(2.dp))
-                                .background(SaddleBrown700)
-                                .border(1.dp, SaddleBrown, RoundedCornerShape(2.dp))
-                                .padding(horizontal = 8.dp, vertical = 3.dp)
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(
+                    text = "¡Aventura a la vista!",
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = AncientGold,
+                    textAlign = TextAlign.Center
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "Prepara tu equipamiento, la mazmorra te aguarda.",
+                    style = MaterialTheme.typography.bodyMedium.copy(fontStyle = FontStyle.Italic),
+                    color = SteelSilver500,
+                    textAlign = TextAlign.Center
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+                GuildDivider(modifier = Modifier.fillMaxWidth(0.8f))
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // ── Pergamino de estadísticas ───────────────────
+                GuildCard(
+                    modifier = Modifier.fillMaxWidth(),
+                    glowColor = AncientGold700,
+                    animatedBorder = true
+                ) {
+                    Column {
+                        SectionLabel("PERGAMINO DE ESTADÍSTICAS")
+
+                        Spacer(modifier = Modifier.height(20.dp))
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceEvenly
+                        ) {
+                            StatItem(label = "NIVEL",     value = "$nivel")
+                            StatItemDivider()
+                            StatItem(label = "XP ACTUAL", value = "$expActual")
+                            StatItemDivider()
+                            StatItem(label = "FALTAN",    value = "$expFaltante")
+                        }
+
+                        Spacer(modifier = Modifier.height(24.dp))
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Text(
-                                text = "📜  PERGAMINO DE ESTADÍSTICAS",
-                                style = MaterialTheme.typography.labelSmall,
+                                text = "Progreso al Nivel ${nivel + 1}",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = SteelSilver500
+                            )
+                            Text(
+                                text = "${(progreso * 100).toInt()}%",
+                                style = MaterialTheme.typography.labelMedium,
                                 color = AncientGold,
-                                letterSpacing = 0.8.sp
+                                fontWeight = FontWeight.Bold
                             )
                         }
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        XpBar(progreso = progreso)
                     }
+                }
 
-                    Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(20.dp))
 
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceEvenly
-                    ) {
-                        StatItem(label = "NIVEL",    value = "$nivel")      // lógica intacta
-                        StatItemDivider()
-                        StatItem(label = "XP ACTUAL",  value = "$expActual")
-                        StatItemDivider()
-                        StatItem(label = "FALTAN",   value = "$expFaltante")
-                    }
-
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    // Etiqueta de la barra
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
+                // ── Misión activa ───────────────────────────────
+                GuildCard(
+                    modifier = Modifier.fillMaxWidth(),
+                    glow = false
+                ) {
+                    Column {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            SectionLabel("MISIÓN ACTIVA", color = AmberFlame)
+                            RarityBadge(text = "EN ESPERA", accent = SteelSilver500, fill = DungeonNoir500)
+                        }
+                        Spacer(modifier = Modifier.height(12.dp))
                         Text(
-                            text = "Progreso al Nivel ${nivel + 1}",
-                            style = MaterialTheme.typography.labelMedium,
+                            text = "Sin misión en curso",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = SteelSilver
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = "Pulsa INICIAR MISIÓN para comenzar una sesión de estudio y ganar XP.",
+                            style = MaterialTheme.typography.bodySmall.copy(fontStyle = FontStyle.Italic),
                             color = SteelSilver500
                         )
-                        Text(
-                            text = "${(progreso * 100).toInt()}%",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = AncientGold,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    // Barra de XP
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(14.dp)
-                            .clip(RoundedCornerShape(2.dp))
-                            .background(DungeonNoir500)
-                            .border(1.dp, SteelSilver200, RoundedCornerShape(2.dp))
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth(progreso.coerceIn(0f, 1f))
-                                .fillMaxHeight()
-                                .background(
-                                    Brush.horizontalGradient(
-                                        colors = listOf(AncientGold700, AncientGold, AncientGold200)
-                                    )
-                                )
-                        )
                     }
                 }
-            }
 
-            Spacer(modifier = Modifier.height(20.dp))
-
-            // ── Card de misión activa (placeholder) ─────────────
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(6.dp))
-                    .background(DungeonNoir700)
-                    .border(
-                        width = 1.dp,
-                        color = SteelSilver200,
-                        shape = RoundedCornerShape(6.dp)
-                    )
-                    .padding(20.dp)
-            ) {
-                Column {
-                    Text(
-                        text = "MISIÓN ACTIVA",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = AmberFlame,
-                        letterSpacing = 1.sp
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Sin misión en curso",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = SteelSilver
-                    )
-                    Text(
-                        text = "Pulsa INICIAR MISIÓN para comenzar una sesión de estudio y ganar XP.",
-                        style = MaterialTheme.typography.bodySmall.copy(fontStyle = FontStyle.Italic),
-                        color = SteelSilver500
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Button(onClick = onNavigateToRooms, content = {Text("Salas")})
-
-                }
+                // Espacio para que el FAB no tape la última card
+                Spacer(modifier = Modifier.height(96.dp))
             }
         }
 
+    }
+}
+
+// ── Barra de XP con brillo dorado animado ───────────────────────
+@Composable
+private fun XpBar(progreso: Float) {
+    val target = progreso.coerceIn(0f, 1f)
+    val animated by animateFloatAsState(
+        targetValue = target,
+        animationSpec = tween(900, easing = EaseInOutSine),
+        label = "xpFill"
+    )
+    val shimmer = rememberInfiniteTransition(label = "xpShimmer")
+    val glowAlpha by shimmer.animateFloat(
+        initialValue = 0.6f, targetValue = 1f,
+        animationSpec = infiniteRepeatable(tween(1400, easing = EaseInOutSine), RepeatMode.Reverse),
+        label = "xpGlow"
+    )
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(16.dp)
+            .clip(RoundedCornerShape(3.dp))
+            .background(DungeonNoir500)
+            .border(1.dp, SteelSilver200, RoundedCornerShape(3.dp))
+    ) {
+        if (animated > 0f) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(animated)
+                    .fillMaxHeight()
+                    .clip(RoundedCornerShape(3.dp))
+                    .guildGlow(color = AncientGold, radius = 8.dp, shape = RoundedCornerShape(3.dp), alpha = glowAlpha * 0.7f)
+                    .background(
+                        Brush.horizontalGradient(
+                            colors = listOf(AncientGold700, AncientGold, AncientGold200)
+                        )
+                    )
+            )
+        }
     }
 }
 
@@ -300,6 +292,10 @@ private fun StatItemDivider() {
         modifier = Modifier
             .width(1.dp)
             .height(48.dp)
-            .background(SteelSilver200)
+            .background(
+                Brush.verticalGradient(
+                    listOf(androidx.compose.ui.graphics.Color.Transparent, SaddleBrown, androidx.compose.ui.graphics.Color.Transparent)
+                )
+            )
     )
 }

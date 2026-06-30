@@ -18,6 +18,7 @@ class MainViewModel @Inject constructor(
 ) : ViewModel() {
 
     val token = userPreferences.getToken
+    val role = userPreferences.getUserRole
     val authEvent = authManager.authEvent
     fun logout() {
         viewModelScope.launch {
