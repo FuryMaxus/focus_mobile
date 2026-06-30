@@ -20,4 +20,8 @@ sealed interface AppRoute {
     @Serializable data object Group : AppRoute
 
     @Serializable data object Inventory : AppRoute
+
+    @Serializable data object Profile : AppRoute
+
+    @Serializable data object Stats : AppRoute
 }

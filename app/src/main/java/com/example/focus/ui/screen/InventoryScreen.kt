@@ -72,7 +72,6 @@ fun InventoryScreen(
             )
         }
     ) { paddingValues ->
-
         DungeonBackground {
             Column(
                 modifier = Modifier
@@ -82,10 +81,7 @@ fun InventoryScreen(
                     .padding(horizontal = 16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-
                 Spacer(modifier = Modifier.height(16.dp))
-
-                // ── Personaje equipado (preview grande, idle) ────
                 GuildCard(
                     modifier = Modifier.fillMaxWidth(),
                     glowColor = AncientGold700,
@@ -96,9 +92,7 @@ fun InventoryScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         SectionLabel("PERSONAJE EQUIPADO")
-
                         Spacer(modifier = Modifier.height(12.dp))
-
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -107,9 +101,7 @@ fun InventoryScreen(
                         ) {
                             IdleCharacter(character = selected, size = 150.dp)
                         }
-
                         Spacer(modifier = Modifier.height(8.dp))
-
                         Text(
                             text = selected.displayName,
                             style = MaterialTheme.typography.headlineSmall,
@@ -122,17 +114,12 @@ fun InventoryScreen(
                         )
                     }
                 }
-
                 Spacer(modifier = Modifier.height(24.dp))
-
-                // ── Selección de personaje ───────────────────────
                 SectionLabel(
                     text = "ELIGE TU PERSONAJE",
                     modifier = Modifier.align(Alignment.Start)
                 )
-
                 Spacer(modifier = Modifier.height(12.dp))
-
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     GuildCharacter.entries.chunked(2).forEach { row ->
                         Row(
@@ -150,17 +137,12 @@ fun InventoryScreen(
                         }
                     }
                 }
-
                 Spacer(modifier = Modifier.height(24.dp))
-
-                // ── Objetos (placeholder) ────────────────────────
                 SectionLabel(
                     text = "OBJETOS DEL MORRAL",
                     modifier = Modifier.align(Alignment.Start)
                 )
-
                 Spacer(modifier = Modifier.height(12.dp))
-
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -169,14 +151,12 @@ fun InventoryScreen(
                         EmptyItemSlot(modifier = Modifier.weight(1f))
                     }
                 }
-
                 Spacer(modifier = Modifier.height(24.dp))
             }
         }
     }
 }
 
-// ── Slot seleccionable de personaje ─────────────────────────────
 @Composable
 private fun CharacterSlot(
     character: GuildCharacter,
@@ -186,7 +166,6 @@ private fun CharacterSlot(
 ) {
     val haptic = LocalHapticFeedback.current
     val shape = RoundedCornerShape(10.dp)
-
     Box(
         modifier = modifier
             .then(
@@ -222,7 +201,6 @@ private fun CharacterSlot(
             ) {
                 IdleCharacter(character = character, size = 78.dp)
             }
-
             Text(
                 text = character.displayName,
                 style = MaterialTheme.typography.titleSmall,
@@ -230,7 +208,6 @@ private fun CharacterSlot(
                 textAlign = TextAlign.Center,
                 maxLines = 1
             )
-
             if (selected) {
                 RarityBadge(text = "EQUIPADO", accent = AmberFlame)
             } else {
@@ -244,7 +221,6 @@ private fun CharacterSlot(
     }
 }
 
-// ── Slot de objeto vacío (placeholder) ──────────────────────────
 @Composable
 private fun EmptyItemSlot(modifier: Modifier = Modifier) {
     val shape = RoundedCornerShape(8.dp)

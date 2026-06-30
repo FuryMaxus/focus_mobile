@@ -1,19 +1,9 @@
 package com.example.focus.ui.component
 
 import androidx.annotation.DrawableRes
-import androidx.compose.animation.core.EaseInOutSine
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.BiasAlignment
@@ -25,18 +15,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.example.focus.R
 
-// ═══════════════════════════════════════════════════════════════
-//  FOCUS MOBILE — Personajes animados (sin Lottie)
-//
-//  Reproduce en Compose puro los movimientos de los *_idle.json y
-//  *_walk.json originales, partiendo de la PNG de frente:
-//   · IDLE → balanceo suave ±2.2°, rebote leve y "respiración"
-//            (squash/stretch ±3%) en ~3s.
-//   · WALK → balanceo ±6.5° + rebote marcado (pasos) en ~2.1s,
-//            con desplazamiento de lado a lado opcional (stroll).
-// ═══════════════════════════════════════════════════════════════
-
-/** Catálogo de personajes disponibles como drawables del app. */
 enum class GuildCharacter(
     @param:DrawableRes val resId: Int,
     val displayName: String
@@ -47,21 +25,13 @@ enum class GuildCharacter(
     Cavernicola(R.drawable.char_cavernicola, "Cavernícola");
 
     companion object {
-        /** Resuelve por nombre de enum; cae a [Duende] si no coincide. */
         fun fromName(name: String?): GuildCharacter =
             entries.firstOrNull { it.name == name } ?: Duende
     }
 }
 
-/** Pose de animación del personaje. */
 enum class CharacterPose { Idle, Walk }
 
-/**
- * Personaje animado según [pose].
- *
- * @param stroll solo aplica a [CharacterPose.Walk]: recorre el ancho
- *               disponible y voltea al llegar a cada extremo.
- */
 @Composable
 fun AnimatedCharacter(
     character: GuildCharacter,
@@ -70,18 +40,37 @@ fun AnimatedCharacter(
     pose: CharacterPose = CharacterPose.Idle,
     stroll: Boolean = false
 ) {
+    AnimatedImage(
+        resId = character.resId,
+        modifier = modifier,
+        size = size,
+        pose = pose,
+        stroll = stroll,
+        contentDescription = character.displayName
+    )
+}
+
+@Composable
+fun AnimatedImage(
+    @DrawableRes resId: Int,
+    modifier: Modifier = Modifier,
+    size: Dp = 96.dp,
+    pose: CharacterPose = CharacterPose.Idle,
+    stroll: Boolean = false,
+    contentDescription: String? = null
+) {
     when (pose) {
-        CharacterPose.Idle -> IdleCharacter(character, modifier, size)
-        CharacterPose.Walk -> WalkingCharacter(character, modifier, size, stroll)
+        CharacterPose.Idle -> IdleAnimation(resId, modifier, size, contentDescription)
+        CharacterPose.Walk -> WalkingAnimation(resId, modifier, size, stroll, contentDescription)
     }
 }
 
-/** Personaje en reposo: balanceo suave + respiración (idle). */
 @Composable
-fun IdleCharacter(
-    character: GuildCharacter,
+private fun IdleAnimation(
+    @DrawableRes resId: Int,
     modifier: Modifier = Modifier,
-    size: Dp = 96.dp
+    size: Dp = 96.dp,
+    contentDescription: String? = null
 ) {
     val transition = rememberInfiniteTransition(label = "idle")
     val sway by transition.animateFloat(
@@ -96,7 +85,6 @@ fun IdleCharacter(
         animationSpec = infiniteRepeatable(tween(1500, easing = EaseInOutSine), RepeatMode.Reverse),
         label = "idleBob"
     )
-    // Respiración: scaleX y scaleY oscilan en contrafase (squash/stretch).
     val breathe by transition.animateFloat(
         initialValue = -1f,
         targetValue = 1f,
@@ -105,8 +93,8 @@ fun IdleCharacter(
     )
 
     Image(
-        painter = painterResource(id = character.resId),
-        contentDescription = character.displayName,
+        painter = painterResource(id = resId),
+        contentDescription = contentDescription,
         contentScale = ContentScale.Fit,
         modifier = modifier
             .size(size)
@@ -119,28 +107,21 @@ fun IdleCharacter(
     )
 }
 
-/**
- * Personaje que "camina".
- *
- * @param stroll si true, además se desplaza de lado a lado y voltea.
- */
 @Composable
-fun WalkingCharacter(
-    character: GuildCharacter,
+private fun WalkingAnimation(
+    @DrawableRes resId: Int,
     modifier: Modifier = Modifier,
     size: Dp = 96.dp,
-    stroll: Boolean = false
+    stroll: Boolean = false,
+    contentDescription: String? = null
 ) {
     val transition = rememberInfiniteTransition(label = "walk")
-
-    // Balanceo del cuerpo: ±6.5°, ciclo completo ~2.13s (como el walk.json)
     val rotation by transition.animateFloat(
         initialValue = -6.5f,
         targetValue = 6.5f,
         animationSpec = infiniteRepeatable(tween(1066, easing = EaseInOutSine), RepeatMode.Reverse),
         label = "rotation"
     )
-    // Rebote vertical: dos "pasos" por cada balanceo
     val bob by transition.animateFloat(
         initialValue = 0f,
         targetValue = -10f,
@@ -148,10 +129,9 @@ fun WalkingCharacter(
         label = "bob"
     )
 
-    val painter = painterResource(id = character.resId)
+    val painter = painterResource(id = resId)
 
     if (stroll) {
-        // Recorrido de ida y vuelta a lo ancho del contenedor
         val phase by transition.animateFloat(
             initialValue = 0f,
             targetValue = 1f,
@@ -159,8 +139,8 @@ fun WalkingCharacter(
             label = "stroll"
         )
         val goingRight = phase < 0.5f
-        val travel = if (goingRight) phase * 2f else (1f - phase) * 2f   // 0..1
-        val bias = travel * 2f - 1f                                      // -1 (izq) .. +1 (der)
+        val travel = if (goingRight) phase * 2f else (1f - phase) * 2f
+        val bias = travel * 2f - 1f
 
         Box(
             modifier = modifier
@@ -169,7 +149,7 @@ fun WalkingCharacter(
         ) {
             Image(
                 painter = painter,
-                contentDescription = character.displayName,
+                contentDescription = contentDescription,
                 contentScale = ContentScale.Fit,
                 modifier = Modifier
                     .align(BiasAlignment(horizontalBias = bias, verticalBias = 1f))
@@ -177,14 +157,14 @@ fun WalkingCharacter(
                     .offset(y = bob.dp)
                     .graphicsLayer {
                         rotationZ = rotation
-                        scaleX = if (goingRight) 1f else -1f   // voltea según dirección
+                        scaleX = if (goingRight) 1f else -1f
                     }
             )
         }
     } else {
         Image(
             painter = painter,
-            contentDescription = character.displayName,
+            contentDescription = contentDescription,
             contentScale = ContentScale.Fit,
             modifier = modifier
                 .size(size)
@@ -192,4 +172,23 @@ fun WalkingCharacter(
                 .graphicsLayer { rotationZ = rotation }
         )
     }
+}
+
+@Composable
+fun IdleCharacter(
+    character: GuildCharacter,
+    modifier: Modifier = Modifier,
+    size: Dp = 96.dp
+) {
+    IdleAnimation(character.resId, modifier, size, character.displayName)
+}
+
+@Composable
+fun WalkingCharacter(
+    character: GuildCharacter,
+    modifier: Modifier = Modifier,
+    size: Dp = 96.dp,
+    stroll: Boolean = false
+) {
+    WalkingAnimation(character.resId, modifier, size, stroll, character.displayName)
 }

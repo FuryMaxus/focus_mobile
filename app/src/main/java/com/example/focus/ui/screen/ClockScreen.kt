@@ -155,7 +155,6 @@ fun ClockScreen(
                         isError = state.isError
                     )
                 }
-
                 Spacer(modifier = Modifier.height(16.dp))
             }
         }
@@ -257,21 +256,16 @@ private fun ClockDisplay(
                     color = if (isRunning) AmberFlame else SteelSilver500,
                     letterSpacing = 2.sp
                 )
-
                 Spacer(modifier = Modifier.height(4.dp))
-
                 val minutesStr = (seconds / 60).toString().padStart(2, '0')
                 val secondsStr = (seconds % 60).toString().padStart(2, '0')
-
                 Text(
                     text = "$minutesStr:$secondsStr",
                     style = MaterialTheme.typography.displayLarge.copy(fontSize = 52.sp, letterSpacing = 4.sp),
                     color = AncientGold.copy(alpha = if (isRunning) glowAlpha else 0.9f),
                     fontWeight = FontWeight.Bold
                 )
-
                 Spacer(modifier = Modifier.height(4.dp))
-
                 val xpEstimada = (seconds / 60) * 10
                 Text(
                     text = if (xpEstimada > 0) "+$xpEstimada XP" else "· · ·",
@@ -305,7 +299,6 @@ private fun ClockActionButtons(
                 fontWeight = FontWeight.Bold
             )
         }
-
         if (seconds > 0) {
             Button(
                 onClick = onSave,
@@ -340,14 +333,12 @@ private fun QuoteBanner(isRunning: Boolean) {
         "\"Los grandes magos empezaron aquí.\""
     )
     var quoteIndex by remember { mutableStateOf(0) }
-
     LaunchedEffect(isRunning) {
         while (isRunning) {
             delay(30_000L.milliseconds)
             quoteIndex = (quoteIndex + 1) % quotes.size
         }
     }
-
     if (isRunning) {
         Box(
             modifier = Modifier
@@ -399,7 +390,6 @@ private fun StatusBadge(isRunning: Boolean, seconds: Int) {
         animationSpec = infiniteRepeatable(tween(700), RepeatMode.Reverse),
         label = "dot"
     )
-
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -440,7 +430,6 @@ private fun StatusBadge(isRunning: Boolean, seconds: Int) {
                 }
             )
         }
-
         Text(
             text = "${seconds / 60} min ${seconds % 60} seg",
             style = MaterialTheme.typography.labelSmall,

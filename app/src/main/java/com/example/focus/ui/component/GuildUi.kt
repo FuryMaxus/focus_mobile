@@ -3,24 +3,9 @@ package com.example.focus.ui.component
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,39 +16,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.focus.ui.theme.AmberFlame
-import com.example.focus.ui.theme.AmberFlame200
-import com.example.focus.ui.theme.AmberFlame700
-import com.example.focus.ui.theme.AncientGold
-import com.example.focus.ui.theme.AncientGold200
-import com.example.focus.ui.theme.AncientGold700
-import com.example.focus.ui.theme.DragonRed
-import com.example.focus.ui.theme.DragonRedSurface
-import com.example.focus.ui.theme.DungeonGreen
-import com.example.focus.ui.theme.DungeonNoir
-import com.example.focus.ui.theme.DungeonNoir500
-import com.example.focus.ui.theme.DungeonNoir700
-import com.example.focus.ui.theme.GuildBorderBrush
-import com.example.focus.ui.theme.InkBlack
-import com.example.focus.ui.theme.SaddleBrown
-import com.example.focus.ui.theme.SaddleBrown700
-import com.example.focus.ui.theme.SteelSilver
-import com.example.focus.ui.theme.SteelSilver500
-import com.example.focus.ui.theme.SurfaceSheenBrush
-import com.example.focus.ui.theme.animatedGoldBorder
-import com.example.focus.ui.theme.guildGlow
+import com.example.focus.ui.theme.*
 
-// ═══════════════════════════════════════════════════════════════
-//  FOCUS MOBILE — Design System · Componentes de Gremio
-//  Bloques reutilizables con acabado premium. Toda pantalla nueva
-//  debería componerse con estos en lugar de Box/Button crudos.
-// ═══════════════════════════════════════════════════════════════
-
-/**
- * Tarjeta de artefacto: superficie elevada con relleno en gradiente
- * (volumen), borde metálico (estático o con shimmer animado) y un
- * resplandor de color opcional que la separa del fondo.
- */
 @Composable
 fun GuildCard(
     modifier: Modifier = Modifier,
@@ -90,10 +44,6 @@ fun GuildCard(
     }
 }
 
-/**
- * Botón primario de acción (llama de ámbar) con resplandor y texto
- * grabado. Soporta estado de carga e icono inicial opcional.
- */
 @Composable
 fun GuildPrimaryButton(
     text: String,
@@ -139,9 +89,6 @@ fun GuildPrimaryButton(
     }
 }
 
-/**
- * Botón secundario delineado en oro, para acciones alternativas.
- */
 @Composable
 fun GuildOutlineButton(
     text: String,
@@ -175,10 +122,6 @@ fun GuildOutlineButton(
     }
 }
 
-/**
- * Etiqueta de sección grabada, flanqueada por rombos dorados.
- * Para encabezar bloques ("PERGAMINO DE ESTADÍSTICAS", etc.).
- */
 @Composable
 fun SectionLabel(
     text: String,
@@ -201,9 +144,6 @@ fun SectionLabel(
     }
 }
 
-/**
- * Insignia de rareza/estado, estilo placa de cuero con borde.
- */
 @Composable
 fun RarityBadge(
     text: String,
@@ -228,10 +168,6 @@ fun RarityBadge(
     }
 }
 
-/**
- * Campo de texto temático del gremio: label grabado encima + input
- * con borde dorado al enfocar y relleno oscuro.
- */
 @Composable
 fun GuildTextField(
     value: String,
@@ -251,7 +187,7 @@ fun GuildTextField(
             fontWeight = FontWeight.Bold
         )
         Spacer(modifier = Modifier.height(6.dp))
-        androidx.compose.material3.OutlinedTextField(
+        OutlinedTextField(
             value = value,
             onValueChange = onValueChange,
             placeholder = {
@@ -268,7 +204,7 @@ fun GuildTextField(
                 androidx.compose.ui.text.input.PasswordVisualTransformation()
             else
                 androidx.compose.ui.text.input.VisualTransformation.None,
-            colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(
+            colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = AncientGold,
                 unfocusedBorderColor = SaddleBrown,
                 focusedLeadingIconColor = AncientGold,
@@ -286,9 +222,6 @@ fun GuildTextField(
     }
 }
 
-/**
- * Caja de mensaje (éxito/error) con borde y color según estado.
- */
 @Composable
 fun GuildFeedback(
     message: String,
@@ -316,10 +249,6 @@ fun GuildFeedback(
     }
 }
 
-/**
- * Separador ornamental con línea dorada en degradado y rombo central.
- * Versión premium del OrnamentalDivider original.
- */
 @Composable
 fun GuildDivider(
     modifier: Modifier = Modifier,

@@ -24,42 +24,21 @@ import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
-// ═══════════════════════════════════════════════════════════════
-//  FOCUS MOBILE — Design System · Efectos Premium
-//
-//  Helpers reutilizables para dar profundidad "AAA" a la estética
-//  D&D: glow de color, bordes dorados con shimmer animado, y
-//  fondos de mazmorra con viñeta. Compatibles con minSdk 26
-//  (los shadow de color se ignoran silenciosamente bajo API 28,
-//   nunca crashean).
-// ═══════════════════════════════════════════════════════════════
-
-// ── Brushes de marca ────────────────────────────────────────────
-
-/** Borde metálico estático: cuero → oro → cuero. */
 val GuildBorderBrush: Brush
     get() = Brush.linearGradient(
         colors = listOf(SaddleBrown, AncientGold700, SaddleBrown)
     )
 
-/** Borde de oro puro (resalte fuerte). */
 val GoldEdgeBrush: Brush
     get() = Brush.linearGradient(
         colors = listOf(AncientGold700, AncientGold, AncientGold200, AncientGold, AncientGold700)
     )
 
-/** Relleno sutil para superficies elevadas: da volumen a las cards. */
 val SurfaceSheenBrush: Brush
     get() = Brush.verticalGradient(
         colors = listOf(DungeonNoir500, DungeonNoir700, InkBlack)
     )
 
-// ── Glow: sombra de color que simula resplandor ─────────────────
-
-/**
- * Aplica un resplandor de [color] alrededor del elemento usando una
- * sombra coloreada. En API < 28 cae a sombra neutra (sin crash).
- */
 fun Modifier.guildGlow(
     color: Color = AmberFlame,
     radius: Dp = 18.dp,
@@ -72,12 +51,6 @@ fun Modifier.guildGlow(
     spotColor = color.copy(alpha = alpha)
 )
 
-// ── Borde dorado animado (shimmer recorriendo el contorno) ──────
-
-/**
- * Borde con un brillo dorado que se desliza de lado a lado,
- * dando sensación de metal pulido bajo una antorcha.
- */
 @Composable
 fun Modifier.animatedGoldBorder(
     width: Dp = 1.5.dp,
@@ -112,13 +85,6 @@ fun Modifier.animatedGoldBorder(
     return this.border(width = width, brush = brush, shape = shape)
 }
 
-// ── Fondo de mazmorra: gradiente vertical + viñeta radial ───────
-
-/**
- * Contenedor de pantalla con la atmósfera de mazmorra: un gradiente
- * vertical de fondo y una viñeta radial que oscurece los bordes y
- * concentra un cálido resplandor de antorcha hacia el centro-superior.
- */
 @Composable
 fun DungeonBackground(
     modifier: Modifier = Modifier,
@@ -134,7 +100,6 @@ fun DungeonBackground(
                 )
             )
             .drawBehind {
-                // Resplandor cálido de antorcha hacia el centro-superior
                 drawRect(
                     brush = Brush.radialGradient(
                         colors = listOf(
@@ -145,7 +110,6 @@ fun DungeonBackground(
                         radius = size.maxDimension * 0.55f
                     )
                 )
-                // Viñeta: oscurece esquinas para dar foco
                 drawRect(
                     brush = Brush.radialGradient(
                         colors = listOf(

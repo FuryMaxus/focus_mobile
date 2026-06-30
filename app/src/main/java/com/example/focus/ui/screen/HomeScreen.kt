@@ -1,18 +1,12 @@
 package com.example.focus.ui.screen
 
-import androidx.compose.animation.core.EaseInOutSine
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Inventory
@@ -23,19 +17,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.focus.viewmodel.HomeViewModel
-import com.example.focus.ui.theme.*
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.focus.ui.component.GuildCard
 import com.example.focus.ui.component.GuildDivider
 import com.example.focus.ui.component.RarityBadge
 import com.example.focus.ui.component.SectionLabel
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-
+import com.example.focus.ui.theme.*
+import com.example.focus.viewmodel.HomeViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,11 +39,10 @@ fun HomeScreen(
     onNavigateToClock: () -> Unit,
     onNavigateToInventory: () -> Unit
 ) {
-
-    val nivel       by viewModel.nivel.collectAsState()
-    val expActual   by viewModel.expActual.collectAsState()
+    val nivel by viewModel.nivel.collectAsState()
+    val expActual by viewModel.expActual.collectAsState()
     val expFaltante by viewModel.expFaltante.collectAsState()
-    val progreso    by viewModel.progreso.collectAsState()
+    val progreso by viewModel.progreso.collectAsState()
 
     Scaffold(
         containerColor = DungeonNoir,
@@ -100,9 +93,14 @@ fun HomeScreen(
             ExtendedFloatingActionButton(
                 onClick = { onNavigateToClock() },
                 containerColor = AmberFlame,
-                contentColor   = InkBlack,
-                shape          = RoundedCornerShape(6.dp),
-                modifier       = Modifier.guildGlow(color = AmberFlame, radius = 20.dp, shape = RoundedCornerShape(6.dp), alpha = 0.6f),
+                contentColor = InkBlack,
+                shape = RoundedCornerShape(6.dp),
+                modifier = Modifier.guildGlow(
+                    color = AmberFlame,
+                    radius = 20.dp,
+                    shape = RoundedCornerShape(6.dp),
+                    alpha = 0.6f
+                ),
                 icon = { Icon(Icons.Filled.PlayArrow, contentDescription = "Iniciar Misión") },
                 text = {
                     Text(
@@ -115,7 +113,6 @@ fun HomeScreen(
             )
         }
     ) { paddingValues ->
-
         DungeonBackground {
             Column(
                 modifier = Modifier
@@ -125,9 +122,7 @@ fun HomeScreen(
                     .padding(horizontal = 16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-
                 Spacer(modifier = Modifier.height(16.dp))
-
                 Text(
                     text = "¡Aventura a la vista!",
                     style = MaterialTheme.typography.headlineMedium,
@@ -141,12 +136,9 @@ fun HomeScreen(
                     color = SteelSilver500,
                     textAlign = TextAlign.Center
                 )
-
                 Spacer(modifier = Modifier.height(16.dp))
                 GuildDivider(modifier = Modifier.fillMaxWidth(0.8f))
                 Spacer(modifier = Modifier.height(20.dp))
-
-                // ── Pergamino de estadísticas ───────────────────
                 GuildCard(
                     modifier = Modifier.fillMaxWidth(),
                     glowColor = AncientGold700,
@@ -154,22 +146,18 @@ fun HomeScreen(
                 ) {
                     Column {
                         SectionLabel("PERGAMINO DE ESTADÍSTICAS")
-
                         Spacer(modifier = Modifier.height(20.dp))
-
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceEvenly
                         ) {
-                            StatItem(label = "NIVEL",     value = "$nivel")
+                            StatItem(label = "NIVEL", value = "$nivel")
                             StatItemDivider()
                             StatItem(label = "XP ACTUAL", value = "$expActual")
                             StatItemDivider()
-                            StatItem(label = "FALTAN",    value = "$expFaltante")
+                            StatItem(label = "FALTAN", value = "$expFaltante")
                         }
-
                         Spacer(modifier = Modifier.height(24.dp))
-
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
@@ -186,16 +174,11 @@ fun HomeScreen(
                                 fontWeight = FontWeight.Bold
                             )
                         }
-
                         Spacer(modifier = Modifier.height(8.dp))
-
                         XpBar(progreso = progreso)
                     }
                 }
-
                 Spacer(modifier = Modifier.height(20.dp))
-
-                // ── Misión activa ───────────────────────────────
                 GuildCard(
                     modifier = Modifier.fillMaxWidth(),
                     glow = false
@@ -223,15 +206,12 @@ fun HomeScreen(
                         )
                     }
                 }
-
-                // Espacio para que el FAB no tape la última card
                 Spacer(modifier = Modifier.height(96.dp))
             }
         }
     }
 }
 
-// ── Barra de XP con brillo dorado animado ───────────────────────
 @Composable
 private fun XpBar(progreso: Float) {
     val target = progreso.coerceIn(0f, 1f)
@@ -261,7 +241,12 @@ private fun XpBar(progreso: Float) {
                     .fillMaxWidth(animated)
                     .fillMaxHeight()
                     .clip(RoundedCornerShape(3.dp))
-                    .guildGlow(color = AncientGold, radius = 8.dp, shape = RoundedCornerShape(3.dp), alpha = glowAlpha * 0.7f)
+                    .guildGlow(
+                        color = AncientGold,
+                        radius = 8.dp,
+                        shape = RoundedCornerShape(3.dp),
+                        alpha = glowAlpha * 0.7f
+                    )
                     .background(
                         Brush.horizontalGradient(
                             colors = listOf(AncientGold700, AncientGold, AncientGold200)
@@ -272,7 +257,6 @@ private fun XpBar(progreso: Float) {
     }
 }
 
-// ── StatItem: número grande + label pequeño ─────────────────────
 @Composable
 fun StatItem(label: String, value: String) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -292,7 +276,6 @@ fun StatItem(label: String, value: String) {
     }
 }
 
-// ── Separador vertical entre stats ──────────────────────────────
 @Composable
 private fun StatItemDivider() {
     Box(
@@ -301,7 +284,7 @@ private fun StatItemDivider() {
             .height(48.dp)
             .background(
                 Brush.verticalGradient(
-                    listOf(androidx.compose.ui.graphics.Color.Transparent, SaddleBrown, androidx.compose.ui.graphics.Color.Transparent)
+                    listOf(Color.Transparent, SaddleBrown, Color.Transparent)
                 )
             )
     )
