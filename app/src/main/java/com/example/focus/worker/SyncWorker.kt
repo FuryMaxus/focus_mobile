@@ -12,6 +12,7 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.io.IOException
 import java.util.UUID
 
 @HiltWorker
@@ -44,16 +45,22 @@ class SyncWorker @AssistedInject constructor(
 
             val response = userStatsRepository.syncBatchSessions(payload)
 
-            if (response.isSuccess) {
-                val idsToDelete = pendingEntities.map { it.id }
-                focusSessionDao.deleteSessionsByIds(idsToDelete)
-                return@withContext Result.success()
-            } else {
-                return@withContext Result.retry()
-            }
-
+            return@withContext response.fold(
+                onSuccess = {
+                    val idsToDelete = pendingEntities.map { it.id }
+                    focusSessionDao.deleteSessionsByIds(idsToDelete)
+                    Result.success()
+                },
+                onFailure = { error ->
+                    if (error is IOException) {
+                        Result.retry()
+                    } else {
+                        Result.failure()
+                    }
+                }
+            )
         } catch (e: Exception) {
-            return@withContext Result.retry()
+            return@withContext Result.failure()
         }
     }
 }

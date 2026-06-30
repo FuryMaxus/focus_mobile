@@ -7,9 +7,11 @@ import androidx.work.ExistingWorkPolicy
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
+import com.example.focus.data.local.UserPreferences
 import com.example.focus.data.local.dao.FocusSessionDao
 import com.example.focus.data.local.entity.FocusSessionEntity
 import com.example.focus.data.remote.SessionItem
+import com.example.focus.repository.FocusSessionRepository
 import com.example.focus.repository.UserStatsRepository
 import com.example.focus.ui.state.ClockState
 import com.example.focus.worker.SyncWorker
@@ -19,6 +21,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.Instant
@@ -30,8 +33,8 @@ import kotlin.time.Duration.Companion.milliseconds
 
 @HiltViewModel
 class ClockViewModel @Inject constructor(
-    private val focusSessionDao: FocusSessionDao,
-    private val workManager: WorkManager
+    private val focusSessionRepository: FocusSessionRepository,
+    private val userPreferences: UserPreferences
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ClockState())
@@ -40,6 +43,14 @@ class ClockViewModel @Inject constructor(
     private var timerJob: Job? = null
     private var startTime: ZonedDateTime? = null
 
+    init {
+        viewModelScope.launch {
+            val multiplier = userPreferences.getEquippedRoomMultiplier.firstOrNull() ?: 1.0f
+            if (multiplier > 1.0f) {
+                _state.update { it.copy(message = "Gremio Activo: Bonus de ${multiplier}x XP") }
+            }
+        }
+    }
 
     fun startStopwatch() {
         if (_state.value.isRunning) return
@@ -72,22 +83,16 @@ class ClockViewModel @Inject constructor(
 
         pauseClock()
         val endTime = ZonedDateTime.now(ZoneOffset.UTC)
-        val formatter = DateTimeFormatter.ISO_INSTANT
 
         _state.update { it.copy(message = "Guardando sesión...", isError = false) }
 
         viewModelScope.launch {
             try {
-                val newSession = FocusSessionEntity(
+                focusSessionRepository.saveSessionAndSync(
                     activityType = "NORMAL",
-                    startTime = formatter.format(currentStartTime),
-                    endTime = formatter.format(endTime),
-                    roomId = null,
-                    xpMultiplier = 1.0f
+                    startTime = currentStartTime,
+                    endTime = endTime
                 )
-                focusSessionDao.insertSession(newSession)
-
-                triggerSyncWorker()
 
                 _state.update {
                     it.copy(
@@ -107,22 +112,6 @@ class ClockViewModel @Inject constructor(
                 }
             }
         }
-    }
-
-    private fun triggerSyncWorker() {
-        val constraints = Constraints.Builder()
-            .setRequiredNetworkType(NetworkType.CONNECTED)
-            .build()
-
-        val syncRequest = OneTimeWorkRequestBuilder<SyncWorker>()
-            .setConstraints(constraints)
-            .build()
-
-        workManager.enqueueUniqueWork(
-            "SyncSessionsWork",
-            ExistingWorkPolicy.REPLACE,
-            syncRequest
-        )
     }
 
 }

@@ -21,6 +21,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.focus.network.AuthEvent
 import com.example.focus.ui.screen.AuthEntryScreen
+import com.example.focus.ui.screen.RoomsScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -95,6 +96,11 @@ fun MainScreen() {
                         mainViewModel.navigateTo(
                             destination = AppRoute.Clock
                         )
+                    },
+                    onNavigateToRooms = {
+                        mainViewModel.navigateTo(
+                            destination = AppRoute.Rooms
+                        )
                     }
                 )
             }
@@ -102,6 +108,13 @@ fun MainScreen() {
                 ClockScreen(
                     onNavigateBack = {
                        mainViewModel.navigateBack()
+                    }
+                )
+            }
+            composable<AppRoute.Rooms> {
+                RoomsScreen(
+                    onNavigateBack = {
+                        mainViewModel.navigateBack()
                     }
                 )
             }
