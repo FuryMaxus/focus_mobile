@@ -1,5 +1,7 @@
 package com.example.focus.ui.screen
 
+import android.content.Context
+import android.os.PowerManager
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -24,12 +26,16 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.example.focus.ui.theme.*
 import com.example.focus.viewmodel.ClockViewModel
 import kotlin.time.Duration.Companion.milliseconds
@@ -46,6 +52,29 @@ fun ClockScreen(
     val seconds = state.timeInSeconds
     val mensajeResultado = state.message
 
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val context = LocalContext.current
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+
+            if (event == Lifecycle.Event.ON_PAUSE || event == Lifecycle.Event.ON_STOP) {
+                val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+                val isScreenOn = powerManager.isInteractive
+
+                val isCurrentlyRunning = viewModel.state.value.isRunning
+
+                if (isCurrentlyRunning && isScreenOn) {
+                    viewModel.finishAndSave()
+                }
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
     val pulseAnim = rememberInfiniteTransition(label = "pulse")
     val pulseScale by pulseAnim.animateFloat(
         initialValue = 1f, targetValue = 1.04f,
@@ -90,7 +119,7 @@ fun ClockScreen(
         label = "arc"
     )
 
-    // ── Lógica de Intensidad Dinámica Mejorada ───────
+    // ── Lógica de Intensidad Dinámica ───────
     // Cada 10 segundos sube un escalón de intensidad (max 100 segundos para test)
     val steps = (seconds / 10).coerceAtMost(10)
     val intensityTarget = steps / 10f
@@ -103,12 +132,12 @@ fun ClockScreen(
     
     // Color dinámico: Ámbar -> Oro -> Rojo -> Púrpura Profundo
     val dynamicGlowColor = when {
-        intensity < 0.3f -> androidx.compose.ui.graphics.lerp(AmberFlame, AncientGold, intensity * 3.3f)
-        intensity < 0.7f -> androidx.compose.ui.graphics.lerp(AncientGold, DragonRed, (intensity - 0.3f) * 2.5f)
-        else -> androidx.compose.ui.graphics.lerp(DragonRed, Color(0xFF6200EA), (intensity - 0.7f) * 3.3f)
+        intensity < 0.3f -> lerp(AmberFlame, AncientGold, intensity * 3.3f)
+        intensity < 0.7f -> lerp(AncientGold, DragonRed, (intensity - 0.3f) * 2.5f)
+        else -> lerp(DragonRed, Color(0xFF6200EA), (intensity - 0.7f) * 3.3f)
     }
 
-    // Efecto de Sacudida (Shake) MUCHO más rápido y agresivo
+    // Efecto de Sacudida
     val shakeOffset by pulseAnim.animateFloat(
         initialValue = -1.5f, targetValue = 1.5f,
         animationSpec = infiniteRepeatable(
@@ -212,9 +241,7 @@ fun ClockScreen(
                 ) {
                     ClockActionButtons(
                         isRunning = isRunning,
-                        seconds = seconds,
                         onStart = { viewModel.startStopwatch() },
-                        onPause = { viewModel.pauseClock() },
                         onSave = { viewModel.finishAndSave() }
                     )
 
@@ -243,7 +270,7 @@ private fun ClockDisplay(
     particle2Y: Float,
     particle3Y: Float,
     particleAlpha: Float,
-    glowColor: androidx.compose.ui.graphics.Color = AmberFlame
+    glowColor: Color = AmberFlame
 ) {
     Box(
         contentAlignment = Alignment.Center,
@@ -322,7 +349,7 @@ private fun ClockDisplay(
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
-                    text = if (isRunning) "EN MISIÓN" else if (seconds > 0) "EN PAUSA" else "LISTO",
+                    text = if (isRunning) "EN MISIÓN" else "LISTO",
                     style = MaterialTheme.typography.labelSmall,
                     color = if (isRunning) AmberFlame else SteelSilver500,
                     letterSpacing = 2.sp
@@ -356,9 +383,7 @@ private fun ClockDisplay(
 @Composable
 private fun ClockActionButtons(
     isRunning: Boolean,
-    seconds: Int,
     onStart: () -> Unit,
-    onPause: () -> Unit,
     onSave: () -> Unit
 ) {
     if (!isRunning) {
@@ -370,34 +395,21 @@ private fun ClockActionButtons(
             elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp)
         ) {
             Text(
-                text = if (seconds == 0) "⚔  INICIAR MISIÓN" else "▶  REANUDAR MISIÓN",
+                text = "INICIAR MISIÓN",
                 style = MaterialTheme.typography.labelLarge,
                 fontWeight = FontWeight.Bold
             )
         }
-
-        if (seconds > 0) {
-            Button(
-                onClick = onSave,
-                modifier = Modifier.fillMaxWidth().height(48.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = DragonRedSurface, contentColor = AmberFlame200),
-                border = androidx.compose.foundation.BorderStroke(1.dp, DragonRed),
-                shape = RoundedCornerShape(4.dp)
-            ) {
-                Text("🏁  TERMINAR Y GUARDAR", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
-            }
-        }
     } else {
         Button(
-            onClick = onPause,
+            onClick = onSave,
             modifier = Modifier.fillMaxWidth().height(54.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = DungeonNoir500, contentColor = SteelSilver),
-            border = androidx.compose.foundation.BorderStroke(1.dp, SteelSilver200),
+            colors = ButtonDefaults.buttonColors(containerColor = DragonRedSurface, contentColor = AmberFlame200),
+            border = androidx.compose.foundation.BorderStroke(1.dp, DragonRed),
             shape = RoundedCornerShape(4.dp)
         ) {
-            Text("⏸  PAUSAR MISIÓN", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
-        }
-    }
+            Text("TERMINAR Y GUARDAR", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
+        }}
 }
 
 @Composable
@@ -497,17 +509,9 @@ private fun StatusBadge(isRunning: Boolean, seconds: Int) {
                     )
             )
             Text(
-                text = when {
-                    isRunning -> "MISIÓN ACTIVA"
-                    seconds > 0 -> "EN PAUSA"
-                    else -> "SIN INICIAR"
-                },
+                text = if (isRunning) "MISIÓN ACTIVA" else "SIN INICIAR",
                 style = MaterialTheme.typography.labelMedium,
-                color = when {
-                    isRunning -> AmberFlame
-                    seconds > 0 -> AncientGold700
-                    else -> SteelSilver500
-                }
+                color = if (isRunning) AmberFlame else SteelSilver500
             )
         }
 
@@ -526,7 +530,7 @@ private fun FireParticles(
     particle2Y: Float,
     particle3Y: Float,
     alpha: Float,
-    color: androidx.compose.ui.graphics.Color = AmberFlame
+    color: Color = AmberFlame
 ) {
     Box(
         modifier = Modifier.size(280.dp),

@@ -2,20 +2,11 @@ package com.example.focus.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.work.Constraints
-import androidx.work.ExistingWorkPolicy
-import androidx.work.NetworkType
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkManager
 import com.example.focus.data.local.UserPreferences
-import com.example.focus.data.local.dao.FocusSessionDao
-import com.example.focus.data.local.entity.FocusSessionEntity
-import com.example.focus.data.remote.SessionItem
 import com.example.focus.repository.FocusSessionRepository
-import com.example.focus.repository.UserStatsRepository
 import com.example.focus.ui.state.ClockState
-import com.example.focus.worker.SyncWorker
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,12 +15,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.time.Instant
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
+import java.time.Duration
+
 
 @HiltViewModel
 class ClockViewModel @Inject constructor(
@@ -55,38 +46,44 @@ class ClockViewModel @Inject constructor(
     fun startStopwatch() {
         if (_state.value.isRunning) return
 
-        if (startTime == null) {
-            startTime = ZonedDateTime.now(ZoneOffset.UTC)
-        }
+        startTime = ZonedDateTime.now(ZoneOffset.UTC)
 
         _state.update { it.copy(isRunning = true, message = "") }
 
         timerJob = viewModelScope.launch {
             while (true) {
                 delay(1000L.milliseconds)
-                _state.update { it.copy(timeInSeconds = it.timeInSeconds + 1) }
+                startTime?.let { start ->
+                    val now = ZonedDateTime.now(ZoneOffset.UTC)
+                    val elapsed = Duration.between(start, now).seconds
+                    _state.update { it.copy(timeInSeconds = elapsed.toInt()) }
+                }
             }
         }
     }
 
-    fun pauseClock() {
-        timerJob?.cancel()
-        _state.update { it.copy(isRunning = false) }
-    }
-
 
     fun finishAndSave() {
+        if (!_state.value.isRunning) return
+
+        _state.update { it.copy(isRunning = false, message = "Guardando sesión...", isError = false) }
+
+
+        timerJob?.cancel()
+        timerJob = null
+
         val currentSeconds = _state.value.timeInSeconds
         val currentStartTime = startTime
 
-        if (currentSeconds == 0 || currentStartTime == null) return
+        if (currentSeconds == 0 || currentStartTime == null) {
+            _state.update { it.copy(timeInSeconds = 0) }
+            return
+        }
 
-        pauseClock()
         val endTime = ZonedDateTime.now(ZoneOffset.UTC)
 
-        _state.update { it.copy(message = "Guardando sesión...", isError = false) }
 
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             try {
                 focusSessionRepository.saveSessionAndSync(
                     activityType = "NORMAL",
