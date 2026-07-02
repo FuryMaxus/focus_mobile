@@ -25,6 +25,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontStyle
@@ -37,6 +38,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.example.focus.ui.theme.*
+import com.example.focus.ui.utils.AntiFarmObserver
 import com.example.focus.viewmodel.ClockViewModel
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.delay
@@ -53,28 +55,12 @@ fun ClockScreen(
     val mensajeResultado = state.message
 
 
-    val lifecycleOwner = LocalLifecycleOwner.current
-    val context = LocalContext.current
+    AntiFarmObserver(
+        isRunning = isRunning,
+        timeInSeconds = seconds,
+        onCheatDetected = { viewModel.finishAndSave() }
+    )
 
-    DisposableEffect(lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event ->
-
-            if (event == Lifecycle.Event.ON_PAUSE || event == Lifecycle.Event.ON_STOP) {
-                val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
-                val isScreenOn = powerManager.isInteractive
-
-                val isCurrentlyRunning = viewModel.state.value.isRunning
-
-                if (isCurrentlyRunning && isScreenOn) {
-                    viewModel.finishAndSave()
-                }
-            }
-        }
-        lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
-        }
-    }
     val pulseAnim = rememberInfiniteTransition(label = "pulse")
     val pulseScale by pulseAnim.animateFloat(
         initialValue = 1f, targetValue = 1.04f,
@@ -138,15 +124,15 @@ fun ClockScreen(
     }
 
     // Efecto de Sacudida
-    val shakeOffset by pulseAnim.animateFloat(
-        initialValue = -1.5f, targetValue = 1.5f,
+    val shakeAnimState = pulseAnim.animateFloat(
+        initialValue = -1.5f,
+        targetValue = 1.5f,
         animationSpec = infiniteRepeatable(
-            tween((60 / (0.6f + intensity)).toInt(), easing = LinearEasing), 
-            RepeatMode.Reverse
+            animation = tween(durationMillis = if (seconds > 40) 20 else 40, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
         ),
         label = "shake"
     )
-    val currentShake = if (isRunning && intensity > 0.2f) (shakeOffset * (1f + intensity * 10f)) else 0f
 
     Scaffold(
         containerColor = Color.Transparent,
@@ -211,7 +197,6 @@ fun ClockScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues) // Aplicamos el padding aquí dentro para que el TopBar sea transparente sobre el fondo
-                    .offset(x = currentShake.dp, y = currentShake.dp)
                     .padding(horizontal = 24.dp, vertical = 16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceBetween
@@ -219,7 +204,15 @@ fun ClockScreen(
                 StatusBadge(isRunning = isRunning, seconds = seconds)
 
                 ClockDisplay(
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier
+                        .weight(1f)
+                        .graphicsLayer{
+                            val isShaking = isRunning && intensity > 0.2f
+                            val factor = 1f + (intensity * 10f)
+                            val offsetPx = if (isShaking) (shakeAnimState.value * factor).dp.toPx() else 0f
+                            translationX = offsetPx
+                            translationY = offsetPx
+                        },
                     isRunning = isRunning,
                     seconds = seconds,
                     pulseScale = pulseScale + (intensity * 0.12f), // Pulso mucho más grande
