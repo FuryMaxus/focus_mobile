@@ -20,6 +20,7 @@ sealed interface AppRoute {
     @Serializable data object Rooms : AppRoute
 
     @Serializable data object Inventory : AppRoute
+    @Serializable data class CharacterDetail(val characterName: String, val hatName: String) : AppRoute
 
     // DM Routes
     @Serializable data object DMPanel : AppRoute

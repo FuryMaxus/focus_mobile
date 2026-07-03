@@ -1,11 +1,13 @@
 package com.example.focus.ui.screen
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -15,18 +17,18 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import com.example.focus.ui.component.GuildCard
-import com.example.focus.ui.component.GuildCharacter
-import com.example.focus.ui.component.IdleCharacter
-import com.example.focus.ui.component.RarityBadge
-import com.example.focus.ui.component.SectionLabel
+import com.example.focus.ui.component.*
 import com.example.focus.ui.theme.*
 import com.example.focus.viewmodel.InventoryViewModel
 
@@ -34,10 +36,14 @@ import com.example.focus.viewmodel.InventoryViewModel
 @Composable
 fun InventoryScreen(
     viewModel: InventoryViewModel = hiltViewModel(),
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onNavigateToDetail: (String, String) -> Unit
 ) {
     val selectedName by viewModel.selectedCharacter.collectAsState()
-    val selected = GuildCharacter.fromName(selectedName)
+    val selectedCharacter = GuildCharacter.fromName(selectedName)
+    
+    val equippedHat by viewModel.equippedHat.collectAsState()
+    val ownedHats by viewModel.ownedHats.collectAsState()
 
     Scaffold(
         containerColor = DungeonNoir,
@@ -83,54 +89,82 @@ fun InventoryScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(20.dp))
 
-                // ── Personaje equipado (preview grande, idle) ────
-                GuildCard(
-                    modifier = Modifier.fillMaxWidth(),
-                    glowColor = AncientGold700,
-                    animatedBorder = true
+                // ── PERSONAJE XL (Preview) ──────────────────────
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(260.dp),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        SectionLabel("PERSONAJE EQUIPADO")
+                    // Resplandor de pedestal
+                    Box(
+                        modifier = Modifier
+                            .size(160.dp)
+                            .offset(y = 70.dp)
+                            .guildGlow(color = AncientGold, radius = 30.dp, alpha = 0.3f)
+                            .background(
+                                Brush.radialGradient(listOf(AncientGold.copy(alpha = 0.2f), Color.Transparent)),
+                                shape = CircleShape
+                            )
+                    )
+                    
+                    IdleCharacter(
+                        character = selectedCharacter,
+                        size = 220.dp,
+                        hat = equippedHat,
+                        modifier = Modifier.clickable { onNavigateToDetail(selectedCharacter.name, equippedHat.name) }
+                    )
+                }
 
-                        Spacer(modifier = Modifier.height(12.dp))
+                Text(
+                    text = selectedCharacter.displayName,
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = AncientGold,
+                    fontWeight = FontWeight.Black
+                )
+                
+                Spacer(modifier = Modifier.height(24.dp))
+                GuildDivider(modifier = Modifier.fillMaxWidth(0.6f))
+                Spacer(modifier = Modifier.height(24.dp))
 
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(180.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            IdleCharacter(character = selected, size = 150.dp)
-                        }
+                // ── Morral (Objetos / Hats) ──────────────────────
+                SectionLabel(text = "OBJETOS DEL MORRAL")
+                Spacer(modifier = Modifier.height(12.dp))
 
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        Text(
-                            text = selected.displayName,
-                            style = MaterialTheme.typography.headlineSmall,
-                            color = AncientGold
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    // Slot para quitar gorro
+                    ItemSlot(
+                        hat = GuildHat.Ninguno,
+                        isSelected = equippedHat == GuildHat.Ninguno,
+                        onClick = { viewModel.equipHat(GuildHat.Ninguno) },
+                        modifier = Modifier.weight(1f)
+                    )
+                    
+                    // Hats que posee el usuario
+                    ownedHats.forEach { hat ->
+                        ItemSlot(
+                            hat = hat,
+                            isSelected = equippedHat == hat,
+                            onClick = { viewModel.equipHat(hat) },
+                            modifier = Modifier.weight(1f)
                         )
-                        Text(
-                            text = "Tu fiel compañero de aventuras",
-                            style = MaterialTheme.typography.bodySmall.copy(fontStyle = FontStyle.Italic),
-                            color = SteelSilver500
-                        )
+                    }
+                    
+                    // Rellenar con vacíos si hay pocos items
+                    repeat(3 - ownedHats.size) {
+                        EmptyItemSlot(modifier = Modifier.weight(1f))
                     }
                 }
 
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(32.dp))
 
                 // ── Selección de personaje ───────────────────────
-                SectionLabel(
-                    text = "ELIGE TU PERSONAJE",
-                    modifier = Modifier.align(Alignment.Start)
-                )
-
+                SectionLabel(text = "ELIGE TU AVENTURERO")
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -142,7 +176,7 @@ fun InventoryScreen(
                             row.forEach { character ->
                                 CharacterSlot(
                                     character = character,
-                                    selected = character == selected,
+                                    selected = character == selectedCharacter,
                                     modifier = Modifier.weight(1f),
                                     onClick = { viewModel.selectCharacter(character.name) }
                                 )
@@ -151,28 +185,57 @@ fun InventoryScreen(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(24.dp))
-
-                // ── Objetos (placeholder) ────────────────────────
-                SectionLabel(
-                    text = "OBJETOS DEL MORRAL",
-                    modifier = Modifier.align(Alignment.Start)
-                )
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    repeat(4) {
-                        EmptyItemSlot(modifier = Modifier.weight(1f))
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(40.dp))
             }
         }
+    }
+}
+
+// ── Slot de Objeto (Gorro) ──────────────────────────────────────
+@Composable
+private fun ItemSlot(
+    hat: GuildHat,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val shape = RoundedCornerShape(10.dp)
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(6.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .aspectRatio(1f)
+                .clip(shape)
+                .background(if (isSelected) AmberFlame.copy(alpha = 0.15f) else DungeonNoir500)
+                .border(
+                    width = if (isSelected) 2.dp else 1.dp,
+                    brush = if (isSelected) GoldEdgeBrush else androidx.compose.ui.graphics.SolidColor(SaddleBrown),
+                    shape = shape
+                )
+                .clickable { onClick() },
+            contentAlignment = Alignment.Center
+        ) {
+            if (hat == GuildHat.Ninguno) {
+                Text("✖", color = SteelSilver500, fontSize = 20.sp)
+            } else {
+                Image(
+                    painter = painterResource(id = hat.resId),
+                    contentDescription = hat.displayName,
+                    modifier = Modifier.size(44.dp)
+                )
+            }
+        }
+        Text(
+            text = hat.displayName.split(" ").last(), // Nombre corto
+            style = MaterialTheme.typography.labelSmall,
+            color = if (isSelected) AncientGold else SteelSilver500,
+            textAlign = TextAlign.Center,
+            maxLines = 1
+        )
     }
 }
 
@@ -189,11 +252,6 @@ private fun CharacterSlot(
 
     Box(
         modifier = modifier
-            .then(
-                if (selected)
-                    Modifier.guildGlow(color = AmberFlame, radius = 14.dp, shape = shape, alpha = 0.5f)
-                else Modifier
-            )
             .clip(shape)
             .background(SurfaceSheenBrush)
             .border(
@@ -209,23 +267,18 @@ private fun CharacterSlot(
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 onClick()
             }
-            .padding(vertical = 14.dp, horizontal = 8.dp),
+            .padding(14.dp),
         contentAlignment = Alignment.Center
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Box(
-                modifier = Modifier.height(90.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                IdleCharacter(character = character, size = 78.dp)
-            }
+            IdleCharacter(character = character, size = 80.dp)
 
             Text(
                 text = character.displayName,
-                style = MaterialTheme.typography.titleSmall,
+                style = MaterialTheme.typography.labelMedium,
                 color = if (selected) AncientGold else SteelSilver,
                 textAlign = TextAlign.Center,
                 maxLines = 1
@@ -233,43 +286,24 @@ private fun CharacterSlot(
 
             if (selected) {
                 RarityBadge(text = "EQUIPADO", accent = AmberFlame)
-            } else {
-                Text(
-                    text = "Tocar para equipar",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = SteelSilver500
-                )
             }
         }
     }
 }
 
-// ── Slot de objeto vacío (placeholder) ──────────────────────────
+// ── Slot de objeto vacío ────────────────────────────────────────
 @Composable
 private fun EmptyItemSlot(modifier: Modifier = Modifier) {
-    val shape = RoundedCornerShape(8.dp)
-    Column(
-        modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(4.dp)
+    val shape = RoundedCornerShape(10.dp)
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .aspectRatio(1f)
+            .clip(shape)
+            .background(DungeonNoir500)
+            .border(1.dp, SaddleBrown.copy(alpha = 0.3f), shape),
+        contentAlignment = Alignment.Center
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .aspectRatio(1f)
-                .clip(shape)
-                .background(DungeonNoir500)
-                .border(1.dp, SteelSilver200, shape),
-            contentAlignment = Alignment.Center
-        ) {
-            Text("✦", color = SteelSilver200, fontSize = 18.sp)
-        }
-        Text(
-            text = "Próximamente",
-            style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp),
-            color = SteelSilver500,
-            textAlign = TextAlign.Center,
-            maxLines = 1
-        )
+        Text("✦", color = SaddleBrown.copy(alpha = 0.5f), fontSize = 18.sp)
     }
 }
