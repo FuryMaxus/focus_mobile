@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
 import com.example.focus.navigation.AppRoute
 import com.example.focus.navigation.NavigationEvent
 import com.example.focus.viewmodel.MainViewModel
@@ -43,12 +44,21 @@ import com.example.focus.ui.screen.RoomsScreen
 import com.example.focus.ui.screen.InventoryScreen
 import com.example.focus.ui.screen.DMCreateRoomScreen
 import com.example.focus.ui.screen.DMPanelScreen
+import com.example.focus.ui.screen.CharacterDetailScreen
 import com.example.focus.ui.theme.animatedGoldBorder
 import com.example.focus.ui.theme.guildGlow
 import com.example.focus.ui.theme.ShieldShape
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Alignment
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Shield
+import androidx.compose.material.icons.filled.Backpack
+import androidx.compose.material.icons.filled.Castle
+import androidx.compose.material.icons.filled.HistoryEdu
+import androidx.compose.material.icons.filled.MilitaryTech
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -235,7 +245,19 @@ fun MainScreen() {
                 InventoryScreen(
                     onNavigateBack = {
                         mainViewModel.navigateBack()
+                    },
+                    onNavigateToDetail = { charName, hatName ->
+                        mainViewModel.navigateTo(AppRoute.CharacterDetail(charName, hatName))
                     }
+                )
+            }
+            
+            composable<AppRoute.CharacterDetail> { backStackEntry ->
+                val route: AppRoute.CharacterDetail = backStackEntry.toRoute()
+                CharacterDetailScreen(
+                    characterName = route.characterName,
+                    hatName = route.hatName,
+                    onNavigateBack = { mainViewModel.navigateBack() }
                 )
             }
 
@@ -302,4 +324,3 @@ private fun HandleAppEffects(
         }
     }
 }
-

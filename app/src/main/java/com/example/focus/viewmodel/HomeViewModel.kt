@@ -3,10 +3,12 @@ package com.example.focus.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.focus.data.local.UserPreferences
+import com.example.focus.ui.component.GuildHat
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -28,6 +30,14 @@ class HomeViewModel @Inject constructor(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = "Duende"
+        )
+        
+    val equippedHat: StateFlow<GuildHat> = userPreferences.getEquippedHat
+        .map { GuildHat.fromName(it) }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = GuildHat.Ninguno
         )
 
     val expActual: StateFlow<Int> = userPreferences.getExp

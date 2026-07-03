@@ -60,6 +60,7 @@ fun HomeScreen(
     val expFaltante by viewModel.expFaltante.collectAsState()
     val progreso    by viewModel.progreso.collectAsState()
     val characterName by viewModel.character.collectAsState()
+    val equippedHat by viewModel.equippedHat.collectAsState()
     
     val clockState by clockViewModel.state.collectAsState()
     
@@ -201,7 +202,8 @@ fun HomeScreen(
                     AnimatedCharacter(
                         character = GuildCharacter.fromName(characterName),
                         modifier = Modifier.size(190.dp),
-                        pose = CharacterPose.Idle
+                        pose = CharacterPose.Idle,
+                        hat = equippedHat
                     )
                 }
 
