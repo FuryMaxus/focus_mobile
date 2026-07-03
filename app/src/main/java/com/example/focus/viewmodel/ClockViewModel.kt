@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.focus.data.local.UserPreferences
 import com.example.focus.repository.FocusSessionRepository
 import com.example.focus.ui.state.ClockState
+import com.example.focus.ui.state.TimerMode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -43,6 +44,18 @@ class ClockViewModel @Inject constructor(
         }
     }
 
+    fun setMode(mode: TimerMode) {
+        if(!_state.value.isRunning) {
+            _state.update { it.copy(mode = mode, timeInSeconds = 0) }
+        }
+    }
+
+    fun setTargetTime(minutes: Int) {
+        if (!_state.value.isRunning) {
+            _state.update { it.copy(targetTimeInSecond = minutes*60) }
+        }
+    }
+
     fun startStopwatch() {
         if (_state.value.isRunning) return
 
@@ -56,7 +69,14 @@ class ClockViewModel @Inject constructor(
                 startTime?.let { start ->
                     val now = ZonedDateTime.now(ZoneOffset.UTC)
                     val elapsed = Duration.between(start, now).seconds
-                    _state.update { it.copy(timeInSeconds = elapsed.toInt()) }
+                    val currentState = _state.value
+                    if(currentState.mode == TimerMode.TIME_TRIAL && elapsed >= currentState.targetTimeInSecond){
+                        _state.update { it.copy(timeInSeconds = currentState.targetTimeInSecond) }
+                        finishAndSave()
+                    } else {
+                        _state.update { it.copy(timeInSeconds = elapsed.toInt()) }
+                    }
+
                 }
             }
         }
@@ -65,7 +85,7 @@ class ClockViewModel @Inject constructor(
 
     fun finishAndSave() {
         if (!_state.value.isRunning) return
-
+        val finalState = _state.value
         _state.update { it.copy(isRunning = false, message = "Guardando sesión...", isError = false) }
 
 
@@ -82,7 +102,8 @@ class ClockViewModel @Inject constructor(
 
         val endTime = ZonedDateTime.now(ZoneOffset.UTC)
 
-
+        val isFailedTimeTrial = finalState.mode == TimerMode.TIME_TRIAL && currentSeconds < finalState.targetTimeInSecond
+        val activityType = if(finalState.mode == TimerMode.TIME_TRIAL) "TIME_TRIAL" else "NORMAL"
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 focusSessionRepository.saveSessionAndSync(
@@ -94,8 +115,9 @@ class ClockViewModel @Inject constructor(
                 _state.update {
                     it.copy(
                         timeInSeconds = 0,
-                        message = "¡Misión completada! Se sincronizará automáticamente.",
-                        isError = false
+                        message = if (isFailedTimeTrial) "Mision fallida: Te rendiste antes de tiempo."
+                                else "¡Mision completada!",
+                        isError = isFailedTimeTrial
                     )
                 }
                 startTime = null

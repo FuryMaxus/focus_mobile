@@ -16,7 +16,13 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.example.focus.service.TimerService
 import android.os.Build
 import android.Manifest
+import android.app.KeyguardManager
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
@@ -31,7 +37,7 @@ fun AntiFarmObserver(
     val context = LocalContext.current
 
     val coroutineScope = rememberCoroutineScope()
-
+    var cheatCheckJob by remember { mutableStateOf<Job?>(null) }
     val currentTime = rememberUpdatedState(timeInSeconds)
     val currentOnCheatState = rememberUpdatedState(onCheatDetected)
 
@@ -50,30 +56,34 @@ fun AntiFarmObserver(
     DisposableEffect(lifecycleOwner, isRunning) {
         val observer = LifecycleEventObserver { _, event ->
             val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
-
+            val keyguardManager = context.getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
 
             if (isRunning) {
                 if (event == Lifecycle.Event.ON_STOP) {
-                    coroutineScope.launch {
-                        delay(500L.milliseconds)
-                        val isScreenOn = powerManager.isInteractive
-                        if (isScreenOn) {
-                            currentOnCheatState.value()
-                        } else {
-                            val serviceIntent = Intent(context, TimerService::class.java).apply {
-                                val elapsedMillis = currentTime.value * 1000L
-                                val estimatedStartMs = System.currentTimeMillis() - elapsedMillis
-                                putExtra("BASE_TIME_MILLIS", estimatedStartMs)
-                            }
-                            try {
-                                context.startForegroundService(serviceIntent)
-                            } catch (e: Exception) {
-                                e.printStackTrace()
-                            }
-                        }
 
+
+                    val serviceIntent = Intent(context, TimerService::class.java).apply {
+                        val elapsedMillis = currentTime.value * 1000L
+                        val estimatedStartMs = System.currentTimeMillis() - elapsedMillis
+                        putExtra("BASE_TIME_MILLIS", estimatedStartMs)
+                    }
+                    try {
+                        context.startForegroundService(serviceIntent)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                    cheatCheckJob = coroutineScope.launch {
+                        delay(1500L.milliseconds)
+                        val isScreenOn = powerManager.isInteractive
+                        val isLocked = keyguardManager.isKeyguardLocked
+
+                        if(isScreenOn && !isLocked) {
+                            currentOnCheatState.value()
+                            context.stopService(Intent(context, TimerService::class.java))
+                        }
                     }
                 } else if (event == Lifecycle.Event.ON_RESUME) {
+                    cheatCheckJob?.cancel()
                     context.stopService(Intent(context, TimerService::class.java))
                 }
             }
@@ -83,6 +93,7 @@ fun AntiFarmObserver(
         lifecycleOwner.lifecycle.addObserver(observer)
 
         onDispose {
+            cheatCheckJob?.cancel()
             lifecycleOwner.lifecycle.removeObserver(observer)
             context.stopService(Intent(context, TimerService::class.java))
         }
