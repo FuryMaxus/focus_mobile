@@ -6,6 +6,7 @@ import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -37,6 +38,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.example.focus.ui.state.TimerMode
 import com.example.focus.ui.theme.*
 import com.example.focus.ui.utils.AntiFarmObserver
 import com.example.focus.viewmodel.ClockViewModel
@@ -51,6 +53,8 @@ fun ClockScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val isRunning = state.isRunning
+    val mode = state.mode
+    val targetTime = state.targetTimeInSecond
     val seconds = state.timeInSeconds
     val mensajeResultado = state.message
 
@@ -98,7 +102,11 @@ fun ClockScreen(
         label = "pAlpha"
     )
 
-    val arcProgress = if (seconds == 0) 0f else ((seconds % 60) / 60f)
+    val arcProgress = if (mode == TimerMode.TIME_TRIAL) {
+        if (targetTime == 0) 0f else (seconds.toFloat() / targetTime.toFloat()).coerceIn(0f,1f)
+    } else {
+        if (seconds == 0) 0f else ((seconds % 60) / 60f)
+    }
     val arcProgressAnim by animateFloatAsState(
         targetValue = arcProgress,
         animationSpec = tween(durationMillis = 800, easing = EaseOutCubic),
@@ -140,10 +148,11 @@ fun ClockScreen(
             TopAppBar(
                 title = {
                     Column {
-                        Text("SESIÓN DE ESTUDIO", style = MaterialTheme.typography.titleLarge, color = AncientGold)
-                        Text("Intensidad: ${(intensity * 100).toInt()}%", style = MaterialTheme.typography.labelSmall, color = dynamicGlowColor, fontWeight = FontWeight.Bold)
+                        Text("Aventura Focus", style = MaterialTheme.typography.titleLarge, color = AncientGold)
+                        Text(if (mode == TimerMode.TIME_TRIAL) "CONTRARRELOJ" else "EXPLORACIÓN LIBRE", style = MaterialTheme.typography.labelSmall, color = dynamicGlowColor, fontWeight = FontWeight.Bold)
                     }
                 },
+                /*
                 actions = {
                     if (intensity > 0.4f) {
                         val combo = when {
@@ -158,7 +167,7 @@ fun ClockScreen(
                             modifier = Modifier.padding(end = 16.dp).guildGlow(color = dynamicGlowColor, radius = 4.dp)
                         )
                     }
-                },
+                }, */
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Atrás", tint = SteelSilver)
@@ -201,7 +210,7 @@ fun ClockScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
-                StatusBadge(isRunning = isRunning, seconds = seconds)
+                StatusBadge(isRunning = isRunning, mode = mode)
 
                 ClockDisplay(
                     modifier = Modifier
@@ -223,10 +232,21 @@ fun ClockScreen(
                     particle2Y = particle2Y,
                     particle3Y = particle3Y,
                     particleAlpha = particleAlpha,
-                    glowColor = dynamicGlowColor
+                    glowColor = dynamicGlowColor,
+                    mode = mode,
+                    targetTime = targetTime
                 )
 
                 QuoteBanner(isRunning = isRunning)
+
+                if (!isRunning && seconds == 0) {
+                    ModeSelectionUI(
+                        currentMode = mode,
+                        targetTime = targetTime,
+                        onModeSelected = { viewModel.setMode(it) },
+                        onTimeSelected = { viewModel.setTargetTime(it) }
+                    )
+                }
 
                 Column(
                     modifier = Modifier.fillMaxWidth(),
@@ -253,123 +273,105 @@ fun ClockScreen(
 @Composable
 private fun ClockDisplay(
     modifier: Modifier = Modifier,
-    isRunning: Boolean,
-    seconds: Int,
-    pulseScale: Float,
-    runeRotation: Float,
-    glowAlpha: Float,
-    arcProgressAnim: Float,
-    particle1Y: Float,
-    particle2Y: Float,
-    particle3Y: Float,
-    particleAlpha: Float,
-    glowColor: Color = AmberFlame
+    isRunning: Boolean, seconds: Int, mode: TimerMode, targetTime: Int,
+    pulseScale: Float, runeRotation: Float, glowAlpha: Float, arcProgressAnim: Float,
+    particle1Y: Float, particle2Y: Float, particle3Y: Float, particleAlpha: Float, glowColor: Color
 ) {
+    BoxWithConstraints(contentAlignment = Alignment.Center, modifier = modifier) {
+        val maxClockSize = 280f
+        val boxDimension = minOf(maxWidth,maxHeight).coerceAtMost(maxClockSize.dp)
+        val scaleFactor= (boxDimension.value / maxClockSize).coerceIn(0.4f,1.0f)
+        Box(contentAlignment = Alignment.Center, modifier = Modifier.size(boxDimension)) {
+            if (isRunning) FireParticles(particle1Y, particle2Y, particle3Y, particleAlpha, glowColor, scaleFactor)
+
+            Box(modifier = Modifier.fillMaxSize().rotate(runeRotation).alpha(if (isRunning) 0.25f else 0.08f), contentAlignment = Alignment.Center) {
+                Text("✦ ᚠ ✦ ᚢ ✦ ᚦ ✦ ᚨ ✦ ᚱ ✦ ᚲ ✦ ᚷ ✦ ᚹ ✦ ᚺ ✦ ᚾ ✦", color = AncientGold, fontSize = (11*scaleFactor).sp, letterSpacing = (2*scaleFactor).sp, textAlign = TextAlign.Center)
+            }
+
+            Canvas(modifier = Modifier.fillMaxSize(0.85f).scale(if (isRunning) pulseScale else 1f)) {
+                val strokeWidth = (6*scaleFactor).dp.toPx()
+                val inset = strokeWidth / 2f
+                drawArc(color = DungeonNoir500, startAngle = -90f, sweepAngle = 360f, useCenter = false, topLeft = Offset(inset, inset), size = Size(size.width - strokeWidth, size.height - strokeWidth), style = Stroke(width = strokeWidth, cap = StrokeCap.Round))
+                if (arcProgressAnim > 0f) {
+                    drawArc(brush = Brush.sweepGradient(colors = listOf(AncientGold700, AncientGold, AncientGold200, AncientGold)), startAngle = -90f, sweepAngle = 360f * arcProgressAnim, useCenter = false, topLeft = Offset(inset, inset), size = Size(size.width - strokeWidth, size.height - strokeWidth), style = Stroke(width = strokeWidth, cap = StrokeCap.Round))
+                }
+            }
+
+            Box(
+                modifier = Modifier.fillMaxSize(0.75f).clip(CircleShape).background(DungeonNoir700).border((1.5*scaleFactor).dp, Brush.linearGradient(listOf(SaddleBrown, AncientGold700, SaddleBrown)), CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(if (isRunning) "EN MISIÓN" else "LISTO", style = MaterialTheme.typography.labelSmall, fontSize = (11*scaleFactor).sp, color = if (isRunning) AmberFlame else SteelSilver500, letterSpacing = (2*scaleFactor).sp)
+                    Spacer(modifier = Modifier.height((4*scaleFactor).dp))
+
+                    val displaySeconds = if (mode == TimerMode.TIME_TRIAL) {
+                        (targetTime - seconds).coerceAtLeast(0)
+                    } else {
+                        seconds
+                    }
+
+                    val minutesStr = (displaySeconds / 60).toString().padStart(2, '0')
+                    val secondsStr = (displaySeconds % 60).toString().padStart(2, '0')
+
+                    Text("$minutesStr:$secondsStr", style = MaterialTheme.typography.displayLarge.copy(fontSize = (46*scaleFactor).sp, letterSpacing = (4*scaleFactor).sp), color = AncientGold.copy(alpha = if (isRunning) glowAlpha else 0.9f), fontWeight = FontWeight.Bold)
+                    Spacer(modifier = Modifier.height((4*scaleFactor).dp))
+
+                    val xpEstimada = if (mode == TimerMode.TIME_TRIAL) (targetTime / 60) * 15 else (seconds / 60) * 10
+                    Text(if (xpEstimada > 0) "+$xpEstimada XP (Estimado)" else "· · ·", style = MaterialTheme.typography.labelMedium, fontSize=(12*scaleFactor).sp, color = if (xpEstimada > 0) DungeonGreen else SteelSilver500)
+                }
+            }
+        }
+    }
+
+}
+
+@Composable
+fun ModeSelectionUI(
+    currentMode: TimerMode,
+    targetTime: Int,
+    onModeSelected: (TimerMode) -> Unit,
+    onTimeSelected: (Int) -> Unit
+) {
+    Column(modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+        Row(
+            modifier = Modifier.clip(RoundedCornerShape(8.dp)).background(DungeonNoir700).border(1.dp, SteelSilver200, RoundedCornerShape(8.dp)),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            ModeTab(title = "Libre", isSelected = currentMode == TimerMode.NORMAL, onClick = { onModeSelected(TimerMode.NORMAL) })
+            ModeTab(title = "Contrarreloj", isSelected = currentMode == TimerMode.TIME_TRIAL, onClick = { onModeSelected(TimerMode.TIME_TRIAL) })
+        }
+
+        if (currentMode == TimerMode.TIME_TRIAL) {
+            Spacer(modifier = Modifier.height(16.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                listOf(15, 25, 45, 60).forEach { min ->
+                    val isSelected = targetTime == (min * 60)
+                    Box(
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .background(if (isSelected) AmberFlame else DungeonNoir700)
+                            .border(1.dp, if (isSelected) AmberFlame else SteelSilver200, CircleShape)
+                            .clickable { onTimeSelected(min) }
+                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                    ) {
+                        Text(text = "${min}m", color = if (isSelected) InkBlack else SteelSilver, fontWeight = FontWeight.Bold)
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ModeTab(title: String, isSelected: Boolean, onClick: () -> Unit) {
     Box(
-        contentAlignment = Alignment.Center,
-        modifier = modifier
+        modifier = Modifier
+            .background(if (isSelected) AncientGold700 else Color.Transparent)
+            .clickable { onClick() }
+            .padding(horizontal = 24.dp, vertical = 10.dp)
     ) {
-        if (isRunning) {
-            FireParticles(
-                particle1Y = particle1Y,
-                particle2Y = particle2Y,
-                particle3Y = particle3Y,
-                alpha = particleAlpha,
-                color = glowColor
-            )
-        }
-
-        Box(
-            modifier = Modifier
-                .size(280.dp)
-                .rotate(runeRotation)
-                .alpha(if (isRunning) 0.25f else 0.08f),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "✦ ᚠ ✦ ᚢ ✦ ᚦ ✦ ᚨ ✦ ᚱ ✦ ᚲ ✦ ᚷ ✦ ᚹ ✦ ᚺ ✦ ᚾ ✦",
-                color = AncientGold,
-                fontSize = 11.sp,
-                letterSpacing = 2.sp,
-                textAlign = TextAlign.Center
-            )
-        }
-
-        Canvas(
-            modifier = Modifier
-                .size(240.dp)
-                .scale(if (isRunning) pulseScale else 1f)
-        ) {
-            val strokeWidth = 6.dp.toPx()
-            val inset = strokeWidth / 2f
-
-            drawArc(
-                color = DungeonNoir500,
-                startAngle = -90f,
-                sweepAngle = 360f,
-                useCenter = false,
-                topLeft = Offset(inset, inset),
-                size = Size(size.width - strokeWidth, size.height - strokeWidth),
-                style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
-            )
-
-            if (arcProgressAnim > 0f) {
-                drawArc(
-                    brush = Brush.sweepGradient(
-                        colors = listOf(AncientGold700, AncientGold, AncientGold200, AncientGold)
-                    ),
-                    startAngle = -90f,
-                    sweepAngle = 360f * arcProgressAnim,
-                    useCenter = false,
-                    topLeft = Offset(inset, inset),
-                    size = Size(size.width - strokeWidth, size.height - strokeWidth),
-                    style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
-                )
-            }
-        }
-
-        Box(
-            modifier = Modifier
-                .size(210.dp)
-                .clip(CircleShape)
-                .background(DungeonNoir700)
-                .border(
-                    width = 1.5.dp,
-                    brush = Brush.linearGradient(colors = listOf(SaddleBrown, AncientGold700, SaddleBrown)),
-                    shape = CircleShape
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(
-                    text = if (isRunning) "EN MISIÓN" else "LISTO",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = if (isRunning) AmberFlame else SteelSilver500,
-                    letterSpacing = 2.sp
-                )
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                val minutesStr = (seconds / 60).toString().padStart(2, '0')
-                val secondsStr = (seconds % 60).toString().padStart(2, '0')
-
-                Text(
-                    text = "$minutesStr:$secondsStr",
-                    style = MaterialTheme.typography.displayLarge.copy(fontSize = 52.sp, letterSpacing = 4.sp),
-                    color = AncientGold.copy(alpha = if (isRunning) glowAlpha else 0.9f),
-                    fontWeight = FontWeight.Bold
-                )
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                val xpEstimada = (seconds / 60) * 10
-                Text(
-                    text = if (xpEstimada > 0) "+$xpEstimada XP" else "· · ·",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = if (xpEstimada > 0) DungeonGreen else SteelSilver500
-                )
-            }
-        }
+        Text(text = title, color = if (isSelected) InkBlack else SteelSilver500, fontWeight = FontWeight.Bold, fontSize = 14.sp)
     }
 }
 
@@ -466,53 +468,19 @@ private fun FeedbackMessage(message: String, isError: Boolean) {
     }
 }
 
+
+
 @Composable
-private fun StatusBadge(isRunning: Boolean, seconds: Int) {
-    val pulseAnim = rememberInfiniteTransition(label = "badge")
-    val dotAlpha by pulseAnim.animateFloat(
-        initialValue = 1f, targetValue = 0.2f,
-        animationSpec = infiniteRepeatable(tween(700), RepeatMode.Reverse),
-        label = "dot"
-    )
-
+private fun StatusBadge(isRunning: Boolean, mode: TimerMode) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(4.dp))
-            .background(DungeonNoir700)
-            .border(1.dp, SteelSilver200, RoundedCornerShape(4.dp))
-            .padding(horizontal = 16.dp, vertical = 10.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+        modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(4.dp)).background(DungeonNoir700).border(1.dp, SteelSilver200, RoundedCornerShape(4.dp)).padding(horizontal = 16.dp, vertical = 10.dp),
+        horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(8.dp)
-                    .clip(CircleShape)
-                    .background(
-                        when {
-                            isRunning -> AmberFlame.copy(alpha = dotAlpha)
-                            seconds > 0 -> AncientGold700
-                            else -> SteelSilver200
-                        }
-                    )
-            )
-            Text(
-                text = if (isRunning) "MISIÓN ACTIVA" else "SIN INICIAR",
-                style = MaterialTheme.typography.labelMedium,
-                color = if (isRunning) AmberFlame else SteelSilver500
-            )
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(if (isRunning) AmberFlame else SteelSilver200))
+            Text(if (isRunning) "MISIÓN ACTIVA" else "SIN INICIAR", style = MaterialTheme.typography.labelMedium, color = if (isRunning) AmberFlame else SteelSilver500)
         }
-
-        Text(
-            text = "${seconds / 60} min ${seconds % 60} seg",
-            style = MaterialTheme.typography.labelSmall,
-            color = SteelSilver500
-        )
+        Text(if (mode == TimerMode.TIME_TRIAL) "OBJETIVO FIJO" else "TIEMPO LIBRE", style = MaterialTheme.typography.labelSmall, color = SteelSilver500)
     }
     Spacer(modifier = Modifier.height(8.dp))
 }
@@ -523,17 +491,18 @@ private fun FireParticles(
     particle2Y: Float,
     particle3Y: Float,
     alpha: Float,
-    color: Color = AmberFlame
+    color: Color = AmberFlame,
+    scale: Float
 ) {
     Box(
-        modifier = Modifier.size(280.dp),
+        modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        Box(modifier = Modifier.offset(x = (-80).dp, y = particle1Y.dp).alpha(alpha)) { Text("🔥", fontSize = 14.sp) }
-        Box(modifier = Modifier.offset(x = 0.dp, y = (particle2Y - 100).dp).alpha(alpha * 0.6f)) { Text("✨", fontSize = 10.sp) }
-        Box(modifier = Modifier.offset(x = 80.dp, y = particle3Y.dp).alpha(alpha)) { Text("🔥", fontSize = 12.sp) }
-        Box(modifier = Modifier.offset(x = (-40).dp, y = (particle1Y - 80).dp).alpha(alpha * 0.5f)) { Text("✦", fontSize = 8.sp, color = color) }
-        Box(modifier = Modifier.offset(x = 40.dp, y = (particle3Y - 70).dp).alpha(alpha * 0.5f)) { Text("✦", fontSize = 8.sp, color = color) }
+        Box(modifier = Modifier.offset(x = (-80 *scale).dp, y = (particle1Y*scale).dp).alpha(alpha)) { Text("🔥", fontSize = (14*scale).sp) }
+        Box(modifier = Modifier.offset(x = (0*scale).dp, y = ((particle2Y - 100)*scale).dp).alpha(alpha * 0.6f)) { Text("✨", fontSize = (10*scale).sp) }
+        Box(modifier = Modifier.offset(x = (80*scale).dp, y = (particle3Y*scale).dp).alpha(alpha)) { Text("🔥", fontSize = (12*scale).sp) }
+        Box(modifier = Modifier.offset(x = (-40*scale).dp, y = ((particle1Y - 80)*scale).dp).alpha(alpha * 0.5f)) { Text("✦", fontSize = (8*scale).sp, color = color) }
+        Box(modifier = Modifier.offset(x = (40*scale).dp, y = ((particle3Y - 70)*scale).dp).alpha(alpha * 0.5f)) { Text("✦", fontSize = (8*scale).sp, color = color) }
     }
 }
 
