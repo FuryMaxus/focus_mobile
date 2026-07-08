@@ -14,7 +14,7 @@ class AuthRepository @Inject constructor(
     private val userPreferences: UserPreferences
 ) {
 
-    suspend fun login(email: String, password: String): Result<Unit> {
+    suspend fun login(email: String, password: String): Result<String> {
         return try {
             val payload = LoginPayload(email = email, password = password)
             val response = apiService.login(payload)
@@ -22,18 +22,19 @@ class AuthRepository @Inject constructor(
             if (response.accessToken.isNotEmpty()) {
                 userPreferences.saveToken(response.accessToken)
                 
-                // Extraer el rol del token JWT y guardarlo
                 val role = JwtUtils.extractClaim(response.accessToken, "role")
-                if (role != null) {
-                    userPreferences.saveRole(role)
+                if (role == null) {
+                    userPreferences.clearSession()
+                    return Result.failure(Exception("El token devuelto no contiene un rol válido."))
                 }
+                userPreferences.saveRole(role)
 
                 val stats = apiService.getUserStats()
                 userPreferences.saveLevelAndExp(
                     exp = stats.totalExp,
                     level = stats.currentLevel
                 )
-                Result.success(Unit)
+                Result.success(role)
             } else {
                 Result.failure(Exception("El servidor no devolvió un token válido"))
             }

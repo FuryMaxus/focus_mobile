@@ -52,4 +52,12 @@ class RoomRepository @Inject constructor(
             Result.failure(e)
         }
     }
+
+    suspend fun fetchRoomStats(roomId: String): Result<com.example.focus.data.remote.SessionReportResponseDto> {
+        return try {
+            Result.success(apiService.getRoomStats(roomId))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }
