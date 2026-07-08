@@ -29,7 +29,7 @@ import com.example.focus.data.remote.RoomResponseDto
 import com.example.focus.ui.component.*
 import com.example.focus.ui.theme.*
 import com.example.focus.viewmodel.DMPanelViewModel
-
+import androidx.compose.foundation.verticalScroll
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DMPanelScreen(
@@ -40,6 +40,7 @@ fun DMPanelScreen(
     val isLoading by viewModel.isLoading.collectAsState()
     val selectedRoom by viewModel.selectedRoom.collectAsState()
     val members by viewModel.roomMembers.collectAsState()
+    val stats by viewModel.roomStats.collectAsState()
 
     DungeonBackground {
         Scaffold(
@@ -96,6 +97,7 @@ fun DMPanelScreen(
                     RoomDetailDialog(
                         room = room,
                         membersCount = members.size,
+                        stats = stats,
                         onClose = { viewModel.selectRoom(null) },
                         onEndRoom = { viewModel.closeCurrentRoom() }
                     )
@@ -178,6 +180,7 @@ private fun EmptyRoomsState(onAction: () -> Unit) {
 private fun RoomDetailDialog(
     room: RoomResponseDto,
     membersCount: Int,
+    stats: List<com.example.focus.data.remote.SessionReportItemDto>,
     onClose: () -> Unit,
     onEndRoom: () -> Unit
 ) {
@@ -191,7 +194,10 @@ private fun RoomDetailDialog(
             animatedBorder = true,
             glowColor = AncientGold
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                modifier = Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState())
+            ) {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     SectionLabel(text = "DETALLES DEL GREMIO", color = AncientGold)
                     IconButton(onClick = onClose, modifier = Modifier.size(24.dp)) {
@@ -240,6 +246,44 @@ private fun RoomDetailDialog(
                         modifier = Modifier.fillMaxWidth(),
                         leading = "🛑"
                     )
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+                GuildDivider()
+
+                SectionLabel(text = "ESTADÍSTICAS DE ESTUDIANTES", color = AncientGold)
+                if (stats.isEmpty()) {
+                    Text(
+                        "No hay sesiones de estudio registradas en este gremio.",
+                        color = SteelSilver500,
+                        style = MaterialTheme.typography.bodySmall,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                } else {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        stats.forEach { stat ->
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(InkBlack, RoundedCornerShape(8.dp))
+                                    .border(1.dp, DungeonNoir500, RoundedCornerShape(8.dp))
+                                    .padding(12.dp)
+                            ) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Column {
+                                        Text("Estudiante: ${stat.userId.take(8)}...", style = MaterialTheme.typography.labelSmall, color = SteelSilver500)
+                                        Text(stat.activityType, style = MaterialTheme.typography.bodyMedium, color = AncientGold, fontWeight = FontWeight.Bold)
+                                    }
+                                    Text("+${stat.expEarned} XP", style = MaterialTheme.typography.titleMedium, color = DungeonGreen)
+                                }
+                            }
+                        }
+                    }
                 }
 
                 Text(

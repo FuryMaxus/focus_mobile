@@ -192,6 +192,13 @@ fun MainScreen() {
                             inclusive = true
                         )
                     },
+                    onNavigateDM = {
+                        mainViewModel.navigateTo(
+                            destination = AppRoute.DMPanel,
+                            popUpTo = AppRoute.Menu,
+                            inclusive = true
+                        )
+                    },
                     onNavigateToRegister = {
                         mainViewModel.navigateTo(
                             destination = AppRoute.Register
