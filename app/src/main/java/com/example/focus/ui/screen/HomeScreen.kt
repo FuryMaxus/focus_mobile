@@ -27,6 +27,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.material.icons.filled.Settings
 import com.example.focus.viewmodel.HomeViewModel
 import com.example.focus.ui.theme.*
 import com.example.focus.ui.component.GuildCard
@@ -53,6 +54,7 @@ fun HomeScreen(
     onNavigateToAuthEntry: () -> Unit,
     onNavigateToClock: () -> Unit,
     onNavigateToRooms: () -> Unit, //temporal
+    onNavigateToSettings: () -> Unit
 ) {
 
     val nivel       by viewModel.nivel.collectAsState()
@@ -98,6 +100,15 @@ fun HomeScreen(
                     containerColor = DungeonNoir700
                 ),
                 actions = {
+                    IconButton(
+                        onClick = onNavigateToSettings
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = "Configuración",
+                            tint = AncientGold
+                        )
+                    }
                     IconButton(
                         onClick = {
                             viewModel.logout(onLogoutSuccess = { onNavigateToAuthEntry() })
@@ -201,7 +212,7 @@ fun HomeScreen(
                 ) {
                     AnimatedCharacter(
                         character = GuildCharacter.fromName(characterName),
-                        modifier = Modifier.size(190.dp),
+                        size = 190.dp, // Ahora pasamos el tamaño directamente aquí
                         pose = CharacterPose.Idle,
                         hat = equippedHat
                     )

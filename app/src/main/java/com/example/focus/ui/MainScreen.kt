@@ -45,6 +45,7 @@ import com.example.focus.ui.screen.InventoryScreen
 import com.example.focus.ui.screen.DMCreateRoomScreen
 import com.example.focus.ui.screen.DMPanelScreen
 import com.example.focus.ui.screen.CharacterDetailScreen
+import com.example.focus.ui.screen.SettingsScreen
 import com.example.focus.ui.theme.animatedGoldBorder
 import com.example.focus.ui.theme.guildGlow
 import com.example.focus.ui.theme.ShieldShape
@@ -82,7 +83,10 @@ fun MainScreen() {
         return
     }
 
-    val startRoute = if (token.isNullOrEmpty()) AppRoute.Menu else AppRoute.Home
+    val startRoute = if (token.isNullOrEmpty()) AppRoute.Menu else {
+        mainViewModel.startBackgroundMusic()
+        AppRoute.Home
+    }
 
     Scaffold(
         bottomBar = {
@@ -91,9 +95,9 @@ fun MainScreen() {
                 val currentDestination = navBackStackEntry?.destination
 
                 NavigationBar(
-                    containerColor = if (isClockScreen) Color.Transparent else DungeonNoir700,
+                    containerColor = DungeonNoir700,
                     contentColor = AncientGold,
-                    tonalElevation = if (isClockScreen) 0.dp else 8.dp
+                    tonalElevation = 8.dp
                 ) {
                     val items = if (role == "dm") {
                         listOf(
@@ -224,6 +228,11 @@ fun MainScreen() {
                         mainViewModel.navigateTo(
                             destination = AppRoute.Rooms
                         )
+                    },
+                    onNavigateToSettings = {
+                        mainViewModel.navigateTo(
+                            destination = AppRoute.Settings
+                        )
                     }
                 )
             }
@@ -276,6 +285,14 @@ fun MainScreen() {
             }
             composable<AppRoute.DMCreateRoom> {
                 DMCreateRoomScreen(
+                    onNavigateBack = {
+                        mainViewModel.navigateBack()
+                    }
+                )
+            }
+            
+            composable<AppRoute.Settings> {
+                SettingsScreen(
                     onNavigateBack = {
                         mainViewModel.navigateBack()
                     }

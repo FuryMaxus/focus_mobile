@@ -27,12 +27,20 @@ class FocusApp : Application(), Configuration.Provider {
     }
 
     private fun createNotificationChannel() {
-        val channel = NotificationChannel(
-            "timer_channel",
-            "Cronómetro de Misión",
-            NotificationManager.IMPORTANCE_DEFAULT
-        ).apply {
+        val channelId = "timer_channel"
+        val channelName = "Cronómetro de Misión"
+        val importance = NotificationManager.IMPORTANCE_DEFAULT
+        
+        val channel = NotificationChannel(channelId, channelName, importance).apply {
             description = "Muestra el tiempo restante de la sesión actual"
+            
+            // Configurar sonido personalizado
+            // val soundUri = android.net.Uri.parse("${android.content.ContentResolver.SCHEME_ANDROID_RESOURCE}://${packageName}/raw/notification_sound")
+            // val audioAttributes = android.media.AudioAttributes.Builder()
+            //     .setContentType(android.media.AudioAttributes.CONTENT_TYPE_SONIFICATION)
+            //     .setUsage(android.media.AudioAttributes.USAGE_NOTIFICATION)
+            //     .build()
+            // setSound(soundUri, audioAttributes)
         }
 
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
