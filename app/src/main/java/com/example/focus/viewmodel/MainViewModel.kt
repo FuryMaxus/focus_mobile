@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.focus.data.local.UserPreferences
 import com.example.focus.navigation.NavigationEvent
 import com.example.focus.network.AuthManager
+import com.example.focus.ui.utils.MusicManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -14,14 +15,25 @@ import javax.inject.Inject
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val userPreferences: UserPreferences,
-    private val authManager: AuthManager
+    private val authManager: AuthManager,
+    private val musicManager: MusicManager
 ) : ViewModel() {
 
     val token = userPreferences.getToken
     val role = userPreferences.getUserRole
     val authEvent = authManager.authEvent
+
+    fun startBackgroundMusic() {
+        musicManager.startMusic()
+    }
+
+    fun stopBackgroundMusic() {
+        musicManager.stopMusic()
+    }
+
     fun logout() {
         viewModelScope.launch {
+            musicManager.stopMusic()
             authManager.triggerSessionExpired()
         }
     }

@@ -79,6 +79,8 @@ class TimerService : Service() {
             this, 0, rootIntent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
 
+        val soundUri = android.net.Uri.parse("${android.content.ContentResolver.SCHEME_ANDROID_RESOURCE}://${packageName}/raw/notification_sound")
+
         return NotificationCompat.Builder(this, "timer_channel")
             .setContentTitle("Misión en Curso ⚔")
             .setContentText("Tiempo concentrado: $timeStr")
@@ -86,6 +88,7 @@ class TimerService : Service() {
             .setOngoing(true)
             .setOnlyAlertOnce(true)
             .setContentIntent(pendingIntent)
+            .setSound(soundUri)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .build()
     }

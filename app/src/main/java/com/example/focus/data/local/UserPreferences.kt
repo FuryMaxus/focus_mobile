@@ -2,6 +2,7 @@ package com.example.focus.data.local
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
@@ -24,6 +25,7 @@ class UserPreferences @Inject constructor(
     private val USER_ROLE = stringPreferencesKey("user_role")
     private val CHARACTER_KEY = stringPreferencesKey("selected_character")
     private val HAT_KEY = stringPreferencesKey("equipped_hat")
+    private val MUSIC_ENABLED_KEY = booleanPreferencesKey("music_enabled")
 
     val getToken: Flow<String?> = dataStore.data.map { it[TOKEN_KEY] }
     val getLevel: Flow<Int> = dataStore.data.map { it[LEVEL_KEY] ?: 1 }
@@ -42,6 +44,8 @@ class UserPreferences @Inject constructor(
     val getCharacter: Flow<String> = dataStore.data.map { it[CHARACTER_KEY] ?: "Duende" }
     
     val getEquippedHat: Flow<String> = dataStore.data.map { it[HAT_KEY] ?: "Ninguno" }
+
+    val isMusicEnabled: Flow<Boolean> = dataStore.data.map { it[MUSIC_ENABLED_KEY] ?: true }
 
     var cachedToken: String? = null
         private set
@@ -86,5 +90,9 @@ class UserPreferences @Inject constructor(
 
     suspend fun saveHat(name: String) {
         dataStore.edit { it[HAT_KEY] = name }
+    }
+
+    suspend fun saveMusicEnabled(enabled: Boolean) {
+        dataStore.edit { it[MUSIC_ENABLED_KEY] = enabled }
     }
 }

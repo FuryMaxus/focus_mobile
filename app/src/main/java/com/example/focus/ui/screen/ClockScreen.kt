@@ -38,6 +38,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.example.focus.ui.component.*
 import com.example.focus.ui.state.TimerMode
 import com.example.focus.ui.theme.*
 import com.example.focus.ui.utils.AntiFarmObserver
@@ -57,6 +58,10 @@ fun ClockScreen(
     val targetTime = state.targetTimeInSecond
     val seconds = state.timeInSeconds
     val mensajeResultado = state.message
+
+    val characterName by viewModel.selectedCharacter.collectAsState()
+    val equippedHat by viewModel.equippedHat.collectAsState()
+    val character = GuildCharacter.fromName(characterName)
 
 
     AntiFarmObserver(
@@ -182,20 +187,12 @@ fun ClockScreen(
                 .fillMaxSize()
                 .background(InkBlack)
         ) {
-            // Fondo dinámico con resplandor radial expandido (Vignette Mágica)
-            Canvas(modifier = Modifier.fillMaxSize()) {
-                val centerOffset = Offset(size.width / 2, size.height * 0.4f)
-                drawRect(
-                    brush = Brush.radialGradient(
-                        colors = listOf(
-                            dynamicGlowColor.copy(alpha = 0.1f + (intensity * 0.3f)),
-                            Color.Transparent
-                        ),
-                        center = centerOffset,
-                        radius = size.maxDimension * (0.4f + intensity * 0.6f)
-                    )
-                )
-            }
+            // Fondo Parallax
+            ParallaxBackground(
+                isRunning = isRunning,
+                intensity = intensity,
+                dynamicColor = dynamicGlowColor
+            )
 
             if (isRunning) {
                 // Partículas que flotan por toda la pantalla
@@ -250,13 +247,24 @@ fun ClockScreen(
 
                 Column(
                     modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     ClockActionButtons(
                         isRunning = isRunning,
                         onStart = { viewModel.startStopwatch() },
                         onSave = { viewModel.finishAndSave() }
                     )
+
+                    if (isRunning) {
+                        AnimatedCharacter(
+                            character = character,
+                            size = 180.dp,
+                            pose = CharacterPose.Walk,
+                            hat = equippedHat,
+                            modifier = Modifier.offset(y = 20.dp) // Bajamos el personaje al pasto
+                        )
+                    }
 
                     FeedbackMessage(
                         message = mensajeResultado,

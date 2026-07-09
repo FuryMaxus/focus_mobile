@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.focus.data.local.UserPreferences
 import com.example.focus.repository.FocusSessionRepository
+import com.example.focus.ui.component.GuildHat
 import com.example.focus.ui.state.ClockState
 import com.example.focus.ui.state.TimerMode
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -11,9 +12,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.ZoneOffset
@@ -31,6 +35,21 @@ class ClockViewModel @Inject constructor(
 
     private val _state = MutableStateFlow(ClockState())
     val state: StateFlow<ClockState> = _state.asStateFlow()
+
+    val selectedCharacter: StateFlow<String> = userPreferences.getCharacter
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = "Duende"
+        )
+
+    val equippedHat: StateFlow<GuildHat> = userPreferences.getEquippedHat
+        .map { GuildHat.fromName(it) }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = GuildHat.Ninguno
+        )
 
     private var timerJob: Job? = null
     private var startTime: ZonedDateTime? = null
