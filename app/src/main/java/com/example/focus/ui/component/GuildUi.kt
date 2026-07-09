@@ -15,19 +15,30 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -165,7 +176,7 @@ fun GuildOutlineButton(
     animatedBorder: Boolean = false
 ) {
     val baseModifier = modifier.height(54.dp)
-    
+
     val finalModifier = if (animatedBorder && enabled) {
         baseModifier.animatedGoldBorder(shape = shape)
     } else {
@@ -252,6 +263,11 @@ fun RarityBadge(
 /**
  * Campo de texto temático del gremio: label grabado encima + input
  * con borde dorado al enfocar y relleno oscuro.
+ *
+ * Si isPassword = true, el texto se oculta por defecto y se agrega
+ * un ícono de ojo a la derecha para alternar visibilidad. El estado
+ * de visibilidad es interno al campo (no hace falta manejarlo desde
+ * el ViewModel).
  */
 @Composable
 fun GuildTextField(
@@ -261,8 +277,11 @@ fun GuildTextField(
     placeholder: String,
     modifier: Modifier = Modifier,
     isPassword: Boolean = false,
-    leadingIcon: String? = null
+    leadingIcon: String? = null,
+    isError: Boolean = false
 ) {
+    var passwordVisible by remember { mutableStateOf(false) }
+
     Column(modifier = modifier) {
         Text(
             text = label,
@@ -285,10 +304,22 @@ fun GuildTextField(
             leadingIcon = leadingIcon?.let {
                 { Text(it, fontSize = 16.sp) }
             },
-            visualTransformation = if (isPassword)
-                androidx.compose.ui.text.input.PasswordVisualTransformation()
+            trailingIcon = if (isPassword) {
+                {
+                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                        Icon(
+                            imageVector = if (passwordVisible) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
+                            contentDescription = if (passwordVisible) "Ocultar contraseña" else "Mostrar contraseña",
+                            tint = SteelSilver500
+                        )
+                    }
+                }
+            } else null,
+            visualTransformation = if (isPassword && !passwordVisible)
+                PasswordVisualTransformation()
             else
-                androidx.compose.ui.text.input.VisualTransformation.None,
+                VisualTransformation.None,
+            isError = isError,
             colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = AncientGold,
                 unfocusedBorderColor = SaddleBrown,
@@ -298,7 +329,8 @@ fun GuildTextField(
                 unfocusedTextColor = SteelSilver,
                 cursorColor = AncientGold,
                 focusedContainerColor = DungeonNoir,
-                unfocusedContainerColor = DungeonNoir
+                unfocusedContainerColor = DungeonNoir,
+                errorBorderColor = DragonRed
             ),
             shape = RoundedCornerShape(6.dp),
             modifier = Modifier.fillMaxWidth(),

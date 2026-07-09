@@ -70,7 +70,7 @@ fun AuthEntryScreen(
             Spacer(modifier = Modifier.height(28.dp))
 
             // ── Título grabado ──────────────────────────────────
-            EngravedTitle("FOCUS")
+            EngravedTitle("WardenClass")
 
             Spacer(modifier = Modifier.height(6.dp))
 
@@ -97,7 +97,7 @@ fun AuthEntryScreen(
 
             // ── Acciones ────────────────────────────────────────
             GuildPrimaryButton(
-                text = "ENTRAR AL GREMIO",
+                text = "ENTRAR A LA AVENTURA",
                 leading = "⚔",
                 onClick = onNavigateToLogin,
                 modifier = Modifier.fillMaxWidth(),
