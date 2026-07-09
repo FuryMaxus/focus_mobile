@@ -30,6 +30,7 @@ class DMPanelViewModel @Inject constructor(
 
     private val _errorMessage = MutableStateFlow("")
     val errorMessage = _errorMessage.asStateFlow()
+
     private val _roomStats = MutableStateFlow<List<com.example.focus.data.remote.SessionReportItemDto>>(emptyList())
     val roomStats = _roomStats.asStateFlow()
 
