@@ -1,15 +1,3 @@
-import org.gradle.kotlin.dsl.java
-import java.util.Properties
-
-val localProperties = Properties()
-val localPropertiesFile = rootProject.file("local.properties")
-if (localPropertiesFile.exists()) {
-    localProperties.load(localPropertiesFile.inputStream())
-}
-val rawApiUrl = localProperties.getProperty("API_BASE_URL") ?: "http://10.0.2.2:8000/"
-val cleanApiUrl = rawApiUrl.replace("\"", "").replace("'", "")
-
-
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -33,8 +21,8 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        buildConfigField("String", "BASE_URL", "\"${cleanApiUrl}\"")
     }
 
     buildTypes {
@@ -52,19 +40,23 @@ android {
     }
     buildFeatures {
         compose = true
-        buildConfig = true
     }
 }
 
 dependencies {
+    // Basic Material icons (includes PlayArrow)
     implementation("androidx.compose.material:material-icons-core")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+// Optional: Add this if you plan to use a wider variety of Material icons later
     implementation("androidx.compose.material:material-icons-extended")
     implementation("androidx.datastore:datastore-preferences:1.0.0")
+    // Retrofit para peticiones HTTP
     implementation("com.squareup.retrofit2:retrofit:2.11.0")
 
+    // Convertidor para usar kotlinx.serialization con Retrofit
     implementation("com.squareup.retrofit2:converter-kotlinx-serialization:2.11.0")
 
+    // OkHttp (Motor de Retrofit) para interceptar peticiones y ver logs
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
     implementation(libs.androidx.core.ktx)
@@ -91,10 +83,13 @@ dependencies {
     implementation(libs.androidx.room.runtime)
     annotationProcessor(libs.androidx.room.compiler)
     implementation(libs.kotlinx.serialization.json)
+    // Kotlinx Serialization
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
 
+    // Retrofit Kotlinx Serialization Converter (Jake Wharton)
     implementation("com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:1.0.0")
 
+    // OkHttp Logging Interceptor
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
 
     implementation(libs.hilt.android)
@@ -113,4 +108,3 @@ dependencies {
     implementation("androidx.hilt:hilt-work:1.2.0")
     ksp("androidx.hilt:hilt-compiler:1.2.0")
 }
-

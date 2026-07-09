@@ -11,7 +11,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Group
-import androidx.compose.material.icons.filled.LockClock
 import androidx.compose.material.icons.filled.Numbers
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
@@ -137,7 +136,7 @@ private fun RoomItem(room: RoomResponseDto, onClick: () -> Unit) {
             }
             
             Spacer(modifier = Modifier.height(4.dp))
-
+            
             Text(
                 text = room.description ?: "Sin descripción",
                 style = MaterialTheme.typography.bodyMedium,
@@ -150,9 +149,6 @@ private fun RoomItem(room: RoomResponseDto, onClick: () -> Unit) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 StatSmall(Icons.Filled.Group, "${room.capacity} Máx")
                 StatSmall(Icons.Filled.Numbers, "XP x${room.xpMultiplier}")
-                if (!room.validFromTime.isNullOrBlank()){
-                    StatSmall(Icons.Filled.LockClock,"Rango valido: ${room.validFromTime} - ${room.validUntilTime}")
-                }
             }
         }
     }
@@ -175,6 +171,7 @@ private fun EmptyRoomsState(onAction: () -> Unit) {
     ) {
         Text("No has forjado ningún gremio aún", color = SteelSilver500, textAlign = TextAlign.Center)
         Spacer(modifier = Modifier.height(16.dp))
+        GuildOutlineButton(text = "Comenzar forja", onClick = onAction)
     }
 }
 
