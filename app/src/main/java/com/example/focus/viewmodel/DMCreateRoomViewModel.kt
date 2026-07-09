@@ -68,13 +68,21 @@ class DMCreateRoomViewModel @Inject constructor(
             _isError.value = false
             _mensaje.value = ""
 
+            val finalStartTime = if (_isTimeRestricted.value) {
+                if (_startTime.value.count { it == ':' } == 1) "${_startTime.value}:00" else _startTime.value
+            } else null
+
+            val finalEndTime = if (_isTimeRestricted.value) {
+                if (_endTime.value.count { it == ':' } == 1) "${_endTime.value}:00" else _endTime.value
+            } else null
+
             val payload = RoomCreatePayload(
                 name = _name.value,
                 description = _description.value.ifBlank { null },
                 capacity = _capacity.value.toIntOrNull() ?: 5,
                 xpMultiplier = _xpMultiplier.value.toFloatOrNull() ?: 1.3f,
-                validFromTime = _startTime.value.ifBlank { null },
-                validUntilTime = _endTime.value.ifBlank { null }
+                validFromTime = finalStartTime,
+                validUntilTime = finalEndTime
             )
 
             roomRepository.createRoom(payload).fold(

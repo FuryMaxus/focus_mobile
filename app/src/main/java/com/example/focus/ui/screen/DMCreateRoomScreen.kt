@@ -244,7 +244,11 @@ private fun showTimePicker(
         context,
         android.R.style.Theme_DeviceDefault_Dialog_Alert,
         { _, selectedHour, selectedMinute ->
-            val time = String.format(java.util.Locale.getDefault(), "%02d:%02d", selectedHour, selectedMinute)
+            val time = String.format(
+                java.util.Locale.getDefault(),
+                "%02d:%02d",
+                selectedHour,
+                selectedMinute)
             onTimeSelected(time)
         },
         hour,

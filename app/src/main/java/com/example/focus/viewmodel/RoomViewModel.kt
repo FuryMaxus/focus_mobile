@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
+
 @HiltViewModel
 class RoomViewModel @Inject constructor(
     private val roomRepository: RoomRepository,
@@ -41,7 +42,7 @@ class RoomViewModel @Inject constructor(
     fun loadRooms() {
         viewModelScope.launch {
             _isLoading.value = true
-            roomRepository.fetchRooms().fold(
+            roomRepository.fetchMyJoinedRooms().fold(
                 onSuccess = { _rooms.value = it },
                 onFailure = { _mensaje.value = "Error al cargar los gremios" }
             )
@@ -83,7 +84,7 @@ class RoomViewModel @Inject constructor(
     fun joinRoom(invitationCode: String, onSuccess: () -> Unit) {
         viewModelScope.launch {
             _isLoading.value = true
-            roomRepository.joinRoom(invitationCode).fold(
+            roomRepository.joinRoom(invitationCode.trim().uppercase()).fold(
                 onSuccess = {
                     loadRooms()
                     onSuccess()
