@@ -36,10 +36,25 @@ class DMCreateRoomViewModel @Inject constructor(
     private val _isError = MutableStateFlow(false)
     val isError = _isError.asStateFlow()
 
+    private val _isTimeRestricted = MutableStateFlow(false)
+    val isTimeRestricted = _isTimeRestricted.asStateFlow()
+
+    private val _startTime = MutableStateFlow("08:00")
+    val startTime = _startTime.asStateFlow()
+
+    private val _endTime = MutableStateFlow("18:00")
+    val endTime = _endTime.asStateFlow()
+
     fun onNameChange(value: String) { _name.value = value }
     fun onDescriptionChange(value: String) { _description.value = value }
     fun onCapacityChange(value: String) { _capacity.value = value }
     fun onMultiplierChange(value: String) { _xpMultiplier.value = value }
+
+    fun onTimeRestrictedChange(restricted: Boolean) { _isTimeRestricted.value = restricted }
+
+    fun onStartTimeChange(time: String) { _startTime.value = time }
+
+    fun onEndTimeChange(time: String) { _endTime.value = time }
 
     fun createRoom(onSuccess: () -> Unit) {
         if (_name.value.isBlank()) {
@@ -53,11 +68,21 @@ class DMCreateRoomViewModel @Inject constructor(
             _isError.value = false
             _mensaje.value = ""
 
+            val finalStartTime = if (_isTimeRestricted.value) {
+                if (_startTime.value.count { it == ':' } == 1) "${_startTime.value}:00" else _startTime.value
+            } else null
+
+            val finalEndTime = if (_isTimeRestricted.value) {
+                if (_endTime.value.count { it == ':' } == 1) "${_endTime.value}:00" else _endTime.value
+            } else null
+
             val payload = RoomCreatePayload(
                 name = _name.value,
                 description = _description.value.ifBlank { null },
                 capacity = _capacity.value.toIntOrNull() ?: 5,
-                xpMultiplier = _xpMultiplier.value.toFloatOrNull() ?: 1.3f
+                xpMultiplier = _xpMultiplier.value.toFloatOrNull() ?: 1.3f,
+                validFromTime = finalStartTime,
+                validUntilTime = finalEndTime
             )
 
             roomRepository.createRoom(payload).fold(
