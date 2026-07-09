@@ -33,7 +33,7 @@ class LoginViewModel @Inject constructor(
     fun onEmailChange(newEmail: String) { _email.value = newEmail }
     fun onPasswordChange(newPassword: String) { _password.value = newPassword }
 
-    fun login(onNavigateStudent: () -> Unit, onNavigateDM: () -> Unit) {
+    fun login(onSuccess: () -> Unit) {
         if (_email.value.isBlank() || _password.value.isBlank()) {
             _isError.value = true
             _mensaje.value = "Los campos no pueden estar vacíos"
@@ -53,16 +53,7 @@ class LoginViewModel @Inject constructor(
                     .value
                     .trim()
             ).fold(
-                onSuccess = { role ->
-                    when (role.lowercase()) {
-                        "student" -> onNavigateStudent()
-                        "dm" -> onNavigateDM()
-                        else -> {
-                            _isError.value = true
-                            _mensaje.value = "Rol no reconocido: $role"
-                        }
-                    }
-                },
+                onSuccess = { onSuccess() },
                 onFailure = { exception ->
                     _isError.value = true
                     _mensaje.value = "Error al iniciar sesión: ${exception.message}"
