@@ -27,6 +27,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 fun LoginScreen(
     viewModel: LoginViewModel = hiltViewModel(),
     onNavigateHome: () -> Unit,
+    onNavigateDM: () -> Unit,
     onNavigateToRegister: () -> Unit
 ) {
 
@@ -102,9 +103,9 @@ fun LoginScreen(
                     Spacer(modifier = Modifier.height(28.dp))
 
                     GuildPrimaryButton(
-                        text = "ENTRAR AL GREMIO",
+                        text = "Iniciar Aventura",
                         leading = "⚔",
-                        onClick = { viewModel.login(onSuccess = { onNavigateHome() }) },
+                        onClick = { viewModel.login(onNavigateStudent = onNavigateHome, onNavigateDM = onNavigateDM) },
                         loading = isLoading,
                         modifier = Modifier.fillMaxWidth()
                     )
