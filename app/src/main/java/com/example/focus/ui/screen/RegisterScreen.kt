@@ -41,13 +41,11 @@ fun RegisterScreen(
 
     var localEmail by remember { mutableStateOf("") }
     var localPassword by remember { mutableStateOf("") }
-    var localConfirmPassword by remember { mutableStateOf("") }
 
-    val role             by viewModel.role.collectAsState()
-    val mensaje          by viewModel.mensaje.collectAsState()
-    val isError          by viewModel.isError.collectAsState()
-    val isLoading         by viewModel.isLoading.collectAsState()
-    val passwordMismatch by viewModel.passwordMismatch.collectAsState()
+    val role      by viewModel.role.collectAsState()
+    val mensaje   by viewModel.mensaje.collectAsState()
+    val isError   by viewModel.isError.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
 
     DungeonBackground {
         Column(
@@ -115,30 +113,6 @@ fun RegisterScreen(
                         leadingIcon = "🗝"
                     )
 
-                    Spacer(modifier = Modifier.height(18.dp))
-
-                    GuildTextField(
-                        value = localConfirmPassword,
-                        onValueChange = {
-                            localConfirmPassword = it
-                            viewModel.onConfirmPasswordChange(it)
-                        },
-                        label = "CONFIRMAR PALABRA DE PASO",
-                        placeholder = "••••••••",
-                        isPassword = true,
-                        leadingIcon = "🗝",
-                        isError = passwordMismatch
-                    )
-
-                    if (passwordMismatch) {
-                        Spacer(modifier = Modifier.height(6.dp))
-                        Text(
-                            text = "⚠ Las contraseñas no coinciden",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = DragonRed
-                        )
-                    }
-
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Text(
@@ -151,7 +125,7 @@ fun RegisterScreen(
                     Spacer(modifier = Modifier.height(18.dp))
 
                     SectionLabel(text = "ELEGIR ROL EN EL GREMIO")
-
+                    
                     Spacer(modifier = Modifier.height(12.dp))
 
                     Row(
@@ -175,9 +149,8 @@ fun RegisterScreen(
                     Spacer(modifier = Modifier.height(28.dp))
 
                     GuildPrimaryButton(
-                        text = "Forjar nueva cuenta!",
+                        text = "INSCRIBIRSE EN EL GREMIO",
                         leading = "✦",
-                        enabled = !passwordMismatch,
                         onClick = { viewModel.register(onSuccess = { onNavigateToLogin() }) },
                         loading = isLoading,
                         modifier = Modifier.fillMaxWidth()
@@ -235,6 +208,7 @@ private fun RoleOption(
         contentAlignment = Alignment.Center
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            // El "puntito" o indicador de selección (Cassette button style)
             Box(
                 modifier = Modifier
                     .size(14.dp)

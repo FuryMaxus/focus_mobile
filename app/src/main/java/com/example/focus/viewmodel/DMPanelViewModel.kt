@@ -27,12 +27,8 @@ class DMPanelViewModel @Inject constructor(
 
     private val _roomMembers = MutableStateFlow<List<MemberResponseDto>>(emptyList())
     val roomMembers = _roomMembers.asStateFlow()
-
     private val _errorMessage = MutableStateFlow("")
     val errorMessage = _errorMessage.asStateFlow()
-    private val _roomStats = MutableStateFlow<List<com.example.focus.data.remote.SessionReportItemDto>>(emptyList())
-    val roomStats = _roomStats.asStateFlow()
-
     init {
         refreshRooms()
     }
@@ -58,10 +54,8 @@ class DMPanelViewModel @Inject constructor(
         _selectedRoom.value = room
         if (room != null) {
             fetchMembers(room.id)
-            fetchRoomStats(room.id)
         } else {
             _roomMembers.value = emptyList()
-            _roomStats.value = emptyList()
         }
     }
 
@@ -69,14 +63,6 @@ class DMPanelViewModel @Inject constructor(
         viewModelScope.launch {
             roomRepository.fetchRoomMembers(roomId).onSuccess {
                 _roomMembers.value = it
-            }
-        }
-    }
-
-    private fun fetchRoomStats(roomId: String) {
-        viewModelScope.launch {
-            roomRepository.fetchRoomStats(roomId).onSuccess { response ->
-                _roomStats.value = response.reports
             }
         }
     }
