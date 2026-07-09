@@ -49,4 +49,6 @@ interface ApiService {
     @POST("api/v1/rooms/{roomId}/end")
     suspend fun endRoom(@retrofit2.http.Path("roomId") roomId: String): RoomResponseDto
 
+    @GET("api/v1/sessions/reports")
+    suspend fun getRoomStats(@retrofit2.http.Query("room_id") roomId: String): com.example.focus.data.remote.SessionReportResponseDto
 }
