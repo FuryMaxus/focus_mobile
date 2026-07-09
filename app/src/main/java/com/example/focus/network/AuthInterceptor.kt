@@ -13,7 +13,6 @@ class AuthInterceptor @Inject constructor(
 ) : Interceptor {
 
     override fun intercept(chain: Interceptor.Chain): Response {
-        val request = chain.request()
         val requestBuilder = chain.request().newBuilder()
 
         val token = runBlocking { userPreferences.getToken.firstOrNull() }
@@ -24,10 +23,7 @@ class AuthInterceptor @Inject constructor(
 
         val response = chain.proceed(requestBuilder.build())
 
-        val isAuthRoute = request.url.encodedPath.contains("login") ||
-                request.url.encodedPath.contains("register")
-
-        if (response.code == 401 && !isAuthRoute) {
+        if (response.code == 401) {
             runBlocking {
                 authManager.triggerSessionExpired()
             }
