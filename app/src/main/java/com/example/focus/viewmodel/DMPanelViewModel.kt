@@ -28,6 +28,8 @@ class DMPanelViewModel @Inject constructor(
     private val _roomMembers = MutableStateFlow<List<MemberResponseDto>>(emptyList())
     val roomMembers = _roomMembers.asStateFlow()
 
+    private val _errorMessage = MutableStateFlow("")
+    val errorMessage = _errorMessage.asStateFlow()
     private val _roomStats = MutableStateFlow<List<com.example.focus.data.remote.SessionReportItemDto>>(emptyList())
     val roomStats = _roomStats.asStateFlow()
 
@@ -38,9 +40,16 @@ class DMPanelViewModel @Inject constructor(
     fun refreshRooms() {
         viewModelScope.launch {
             _isLoading.value = true
-            roomRepository.fetchRooms().onSuccess {
-                _rooms.value = it
-            }
+            _errorMessage.value = ""
+            roomRepository.fetchRoomsCreated().fold(
+                onSuccess = { salas ->
+                    _rooms.value = salas
+                },
+                onFailure = { error ->
+                    _errorMessage.value = "Error: ${error.message}"
+                    println("❌ ERROR AL TRAER SALAS DEL DM: ${error.message}")
+                }
+            )
             _isLoading.value = false
         }
     }
