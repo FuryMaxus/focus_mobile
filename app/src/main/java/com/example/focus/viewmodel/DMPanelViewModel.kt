@@ -36,16 +36,9 @@ class DMPanelViewModel @Inject constructor(
     fun refreshRooms() {
         viewModelScope.launch {
             _isLoading.value = true
-            _errorMessage.value = ""
-            roomRepository.fetchRoomsCreated().fold(
-                onSuccess = { salas ->
-                    _rooms.value = salas
-                },
-                onFailure = { error ->
-                    _errorMessage.value = "Error: ${error.message}"
-                    println("❌ ERROR AL TRAER SALAS DEL DM: ${error.message}")
-                }
-            )
+            roomRepository.fetchRooms().onSuccess {
+                _rooms.value = it
+            }
             _isLoading.value = false
         }
     }

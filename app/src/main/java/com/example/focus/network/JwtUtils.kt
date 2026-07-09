@@ -18,6 +18,7 @@ object JwtUtils {
             val payloadString = String(decodedBytes, Charsets.UTF_8)
             
             val jsonObject = JSONObject(payloadString)
+            // En el backend envías user.role.value, solemos buscar "role" o el nombre que definas
             if (jsonObject.has(claim)) {
                 jsonObject.getString(claim)
             } else {

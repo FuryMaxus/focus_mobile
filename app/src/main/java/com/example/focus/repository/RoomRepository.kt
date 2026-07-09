@@ -21,22 +21,6 @@ class RoomRepository @Inject constructor(
         }
     }
 
-    suspend fun fetchRoomsCreated(): Result<List<RoomResponseDto>> {
-        return try {
-            Result.success(apiService.getMyCreatedRooms())
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-    suspend fun fetchMyJoinedRooms(): Result<List<RoomResponseDto>> {
-        return try {
-            Result.success(apiService.getMyJoinedRooms())
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
     suspend fun createRoom(payload: RoomCreatePayload): Result<RoomResponseDto> {
         return try {
             Result.success(apiService.createRoom(payload))

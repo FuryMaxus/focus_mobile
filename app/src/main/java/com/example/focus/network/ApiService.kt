@@ -11,6 +11,7 @@ import com.example.focus.data.remote.SyncPayload
 import com.example.focus.data.remote.SyncResponse
 import com.example.focus.data.remote.TokenResponse
 import com.example.focus.data.remote.UserStatsDto
+import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
@@ -30,12 +31,6 @@ interface ApiService {
 
     @GET("api/v1/rooms/")
     suspend fun getRooms(): List<RoomResponseDto>
-
-    @GET("api/v1/rooms/me/created")
-    suspend fun getMyCreatedRooms(): List<RoomResponseDto>
-
-    @GET("api/v1/rooms/me/joined")
-    suspend fun getMyJoinedRooms(): List<RoomResponseDto>
 
     @POST("api/v1/rooms/")
     suspend fun createRoom(@Body payload: RoomCreatePayload): RoomResponseDto
