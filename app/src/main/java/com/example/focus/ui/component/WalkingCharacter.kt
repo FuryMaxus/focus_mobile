@@ -41,7 +41,7 @@ enum class GuildCharacter(
 ) {
     Duende(R.drawable.char_duende_verde, "Duende Verde", hatOffsetX = 0.073f, hatOffsetY = -0.313f),
     Demonio(R.drawable.char_demonio_morado, "Demonio Morado", hatOffsetX = 0.073f, hatOffsetY = -0.313f),
-    Dragon(R.drawable.char_dragon_rojo, "Dragón Rojo", hatOffsetX = -0.026f, hatOffsetY = -0.28f),
+    Dragon(R.drawable.char_dragon_rojo, "Dragón Rojo", hatOffsetX = -0.026f, hatOffsetY = -0.283f),
     Cavernicola(R.drawable.char_cavernicola, "Cavernícola", hatOffsetX = 0.073f, hatOffsetY = -0.313f);
 
     companion object {
@@ -64,7 +64,7 @@ fun AnimatedCharacter(
 ) {
     when (pose) {
         CharacterPose.Idle -> IdleCharacter(character, modifier, size, hat, customHatOffset)
-        CharacterPose.Walk -> WalkingCharacter(character, modifier, size, stroll)
+        CharacterPose.Walk -> WalkingCharacter(character, modifier, size, stroll, hat)
     }
 }
 
@@ -128,21 +128,59 @@ fun IdleCharacter(
 }
 
 @Composable
+fun PersonajeAnimado(@DrawableRes imagenRes: Int) {
+    val transition = rememberInfiniteTransition(label = "CaminataPersonaje")
+
+    val rotation by transition.animateFloat(
+        initialValue = -6f,
+        targetValue = 6f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 400, easing = LinearOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "RotacionBalanceo"
+    )
+
+    val translationY by transition.animateFloat(
+        initialValue = 0f,
+        targetValue = -15f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 200, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "RebotePaso"
+    )
+
+    Image(
+        painter = painterResource(id = imagenRes),
+        contentDescription = "Personaje animado caminando",
+        modifier = Modifier
+            .size(250.dp)
+            .graphicsLayer {
+                this.rotationZ = rotation
+                this.translationY = translationY
+            }
+    )
+}
+
+@Composable
 fun WalkingCharacter(
     character: GuildCharacter,
     modifier: Modifier = Modifier,
     size: Dp = 96.dp,
-    stroll: Boolean = false
+    stroll: Boolean = false,
+    hat: GuildHat = GuildHat.Ninguno
 ) {
     val transition = rememberInfiniteTransition(label = "walk")
+
     val rotation by transition.animateFloat(
-        initialValue = -6.5f, targetValue = 6.5f,
-        animationSpec = infiniteRepeatable(tween(1066, easing = EaseInOutSine), RepeatMode.Reverse),
+        initialValue = -6f, targetValue = 6f,
+        animationSpec = infiniteRepeatable(tween(400, easing = LinearOutSlowInEasing), RepeatMode.Reverse),
         label = "rotation"
     )
     val bob by transition.animateFloat(
-        initialValue = 0f, targetValue = -10f,
-        animationSpec = infiniteRepeatable(tween(533, easing = EaseInOutSine), RepeatMode.Reverse),
+        initialValue = 0f, targetValue = -15f,
+        animationSpec = infiniteRepeatable(tween(200, easing = FastOutSlowInEasing), RepeatMode.Reverse),
         label = "bob"
     )
 
@@ -159,26 +197,69 @@ fun WalkingCharacter(
         val bias = travel * 2f - 1f
 
         Box(modifier = modifier.fillMaxWidth().height(size + 16.dp)) {
+            Box(
+                modifier = Modifier
+                    .align(BiasAlignment(horizontalBias = bias, verticalBias = 1f))
+                    .size(size)
+            ) {
+                Image(
+                    painter = painter,
+                    contentDescription = character.displayName,
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier.fillMaxSize().graphicsLayer {
+                        rotationZ = rotation
+                        translationY = bob
+                        scaleX = if (goingRight) 1f else -1f
+                    }
+                )
+                
+                if (hat != GuildHat.Ninguno) {
+                    val finalX = (size.value * character.hatOffsetX).dp
+                    val finalY = (bob + (size.value * character.hatOffsetY)).dp
+                    
+                    Image(
+                        painter = painterResource(id = hat.resId),
+                        contentDescription = hat.displayName,
+                        contentScale = ContentScale.Fit,
+                        modifier = Modifier
+                            .size(size * 0.65f)
+                            .offset(x = finalX, y = finalY)
+                            .graphicsLayer {
+                                rotationZ = rotation
+                                scaleX = if (goingRight) 1f else -1f
+                            }
+                    )
+                }
+            }
+        }
+    } else {
+        Box(modifier = modifier.size(size), contentAlignment = Alignment.TopCenter) {
             Image(
                 painter = painter,
                 contentDescription = character.displayName,
                 contentScale = ContentScale.Fit,
-                modifier = Modifier
-                    .align(BiasAlignment(horizontalBias = bias, verticalBias = 1f))
-                    .size(size)
-                    .offset(y = bob.dp)
-                    .graphicsLayer {
-                        rotationZ = rotation
-                        scaleX = if (goingRight) 1f else -1f
-                    }
+                modifier = Modifier.fillMaxSize().graphicsLayer { 
+                    rotationZ = rotation
+                    this.translationY = bob
+                }
             )
+
+            if (hat != GuildHat.Ninguno) {
+                val finalX = (size.value * character.hatOffsetX).dp
+                val finalY = (bob + (size.value * character.hatOffsetY)).dp
+
+                Image(
+                    painter = painterResource(id = hat.resId),
+                    contentDescription = hat.displayName,
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier
+                        .size(size * 0.65f)
+                        .offset(x = finalX, y = finalY)
+                        .graphicsLayer {
+                            rotationZ = rotation
+                        }
+                )
+            }
         }
-    } else {
-        Image(
-            painter = painter,
-            contentDescription = character.displayName,
-            contentScale = ContentScale.Fit,
-            modifier = modifier.size(size).offset(y = bob.dp).graphicsLayer { rotationZ = rotation }
-        )
     }
 }
