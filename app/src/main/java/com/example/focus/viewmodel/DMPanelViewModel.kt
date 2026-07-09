@@ -27,7 +27,8 @@ class DMPanelViewModel @Inject constructor(
 
     private val _roomMembers = MutableStateFlow<List<MemberResponseDto>>(emptyList())
     val roomMembers = _roomMembers.asStateFlow()
-
+    private val _errorMessage = MutableStateFlow("")
+    val errorMessage = _errorMessage.asStateFlow()
     init {
         refreshRooms()
     }
