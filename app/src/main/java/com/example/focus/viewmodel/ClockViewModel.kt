@@ -126,7 +126,7 @@ class ClockViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 focusSessionRepository.saveSessionAndSync(
-                    activityType = "NORMAL",
+                    activityType = activityType,
                     startTime = currentStartTime,
                     endTime = endTime
                 )
