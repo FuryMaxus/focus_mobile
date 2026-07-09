@@ -23,11 +23,10 @@ class MusicManager @Inject constructor(
 
         if (mediaPlayer == null) {
             try {
-                // Descomenta esto cuando añadas el archivo background_music a res/raw
-                // mediaPlayer = MediaPlayer.create(context, R.raw.background_music)
-                // mediaPlayer?.isLooping = true
-                // mediaPlayer?.setVolume(0.4f, 0.4f)
-                // mediaPlayer?.start()
+                mediaPlayer = MediaPlayer.create(context, R.raw.background_music)
+                mediaPlayer?.isLooping = true
+                mediaPlayer?.setVolume(0.4f, 0.4f)
+                mediaPlayer?.start()
             } catch (e: Exception) {
                 e.printStackTrace()
             }

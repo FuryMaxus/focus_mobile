@@ -35,12 +35,12 @@ class FocusApp : Application(), Configuration.Provider {
             description = "Muestra el tiempo restante de la sesión actual"
             
             // Configurar sonido personalizado
-            // val soundUri = android.net.Uri.parse("${android.content.ContentResolver.SCHEME_ANDROID_RESOURCE}://${packageName}/raw/notification_sound")
-            // val audioAttributes = android.media.AudioAttributes.Builder()
-            //     .setContentType(android.media.AudioAttributes.CONTENT_TYPE_SONIFICATION)
-            //     .setUsage(android.media.AudioAttributes.USAGE_NOTIFICATION)
-            //     .build()
-            // setSound(soundUri, audioAttributes)
+            val soundUri = android.net.Uri.parse("${android.content.ContentResolver.SCHEME_ANDROID_RESOURCE}://${packageName}/raw/notification_sound")
+            val audioAttributes = android.media.AudioAttributes.Builder()
+                .setContentType(android.media.AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                .setUsage(android.media.AudioAttributes.USAGE_NOTIFICATION)
+                .build()
+            setSound(soundUri, audioAttributes)
         }
 
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
