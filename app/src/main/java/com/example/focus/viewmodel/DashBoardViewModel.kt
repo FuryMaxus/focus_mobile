@@ -39,7 +39,7 @@ class DashboardViewModel @Inject constructor(
         loadDmRooms()
     }
 
-    private fun loadDmRooms() {
+     fun loadDmRooms() {
         viewModelScope.launch {
             _isLoading.value = true
             repository.fetchRoomsCreated().fold(

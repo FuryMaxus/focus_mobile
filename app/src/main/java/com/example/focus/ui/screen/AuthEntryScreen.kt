@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -39,6 +40,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
 import com.example.focus.ui.component.GuildDivider
 import com.example.focus.ui.component.GuildOutlineButton
@@ -54,6 +56,7 @@ import com.example.focus.ui.theme.SaddleBrown
 import com.example.focus.ui.theme.SteelSilver500
 import com.example.focus.ui.theme.guildGlow
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AuthEntryScreen(
     onNavigateToLogin: () -> Unit,
@@ -80,7 +83,7 @@ fun AuthEntryScreen(
 
             Text(
                 text = "EL GREMIO DEL ESTUDIO",
-                style = MaterialTheme.typography.labelMedium,
+                style = typography.labelMedium,
                 color = AncientGold700,
                 letterSpacing = 4.sp,
                 textAlign = TextAlign.Center
@@ -92,7 +95,7 @@ fun AuthEntryScreen(
 
             Text(
                 text = "\"Cada hora de estudio forja un héroe.\nLa mazmorra del conocimiento te aguarda.\"",
-                style = MaterialTheme.typography.bodyMedium.copy(fontStyle = FontStyle.Italic),
+                style = typography.bodyMedium.copy(fontStyle = FontStyle.Italic),
                 color = SteelSilver500,
                 textAlign = TextAlign.Center
             )
@@ -122,7 +125,7 @@ fun AuthEntryScreen(
 
             Text(
                 text = "v1.0 · Forjado en las profundidades",
-                style = MaterialTheme.typography.labelSmall,
+                style = typography.labelSmall,
                 color = SteelSilver500.copy(alpha = 0.5f),
                 textAlign = TextAlign.Center
             )
@@ -198,9 +201,12 @@ private fun GuildCrest() {
 }
 
 // ── Título con efecto grabado (capa de sombra + capa dorada) ─────
+
+
 @Composable
 private fun EngravedTitle(text: String) {
-    var textStyle by remember { mutableStateOf(androidx.compose.material3.MaterialTheme.typography.displayLarge.copy(letterSpacing = 6.sp)) }
+    val baseStyle = typography.displayLarge.copy(letterSpacing = 6.sp)
+    var textStyle by remember { mutableStateOf(baseStyle) }
     var readyToDraw by remember { mutableStateOf(false) }
 
     Box(
