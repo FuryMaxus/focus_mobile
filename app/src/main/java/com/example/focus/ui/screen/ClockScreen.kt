@@ -15,6 +15,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
@@ -194,6 +195,21 @@ fun ClockScreen(
                 dynamicColor = dynamicGlowColor
             )
 
+            // Personaje posicionado de forma responsiva respecto al fondo (pasto)
+            if (isRunning) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = BiasAlignment(0f, 0.92f) // Ajuste para que "pise" el suelo del fondo parallax
+                ) {
+                    AnimatedCharacter(
+                        character = character,
+                        size = 180.dp,
+                        pose = CharacterPose.Walk,
+                        hat = equippedHat
+                    )
+                }
+            }
+
             if (isRunning) {
                 // Partículas que flotan por toda la pantalla
                 FullScreenEpicParticles(intensity = intensity, color = dynamicGlowColor)
@@ -205,13 +221,15 @@ fun ClockScreen(
                     .padding(paddingValues) // Aplicamos el padding aquí dentro para que el TopBar sea transparente sobre el fondo
                     .padding(horizontal = 24.dp, vertical = 16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.SpaceBetween
+                verticalArrangement = Arrangement.Top // Cambiado a Top para subir el reloj
             ) {
                 StatusBadge(isRunning = isRunning, mode = mode)
 
+                Spacer(modifier = Modifier.height(16.dp)) // Espacio tras el badge
+
                 ClockDisplay(
                     modifier = Modifier
-                        .weight(1f)
+                        .heightIn(max = 300.dp) // Limitamos altura para que no empuje todo
                         .graphicsLayer{
                             val isShaking = isRunning && intensity > 0.2f
                             val factor = 1f + (intensity * 10f)
@@ -234,17 +252,9 @@ fun ClockScreen(
                     targetTime = targetTime
                 )
 
-                QuoteBanner(isRunning = isRunning)
+                Spacer(modifier = Modifier.height(20.dp)) // Espacio tras el reloj
 
-                if (!isRunning && seconds == 0) {
-                    ModeSelectionUI(
-                        currentMode = mode,
-                        targetTime = targetTime,
-                        onModeSelected = { viewModel.setMode(it) },
-                        onTimeSelected = { viewModel.setTargetTime(it) }
-                    )
-                }
-
+                // Movemos los botones de acción aquí para que estén más arriba y no tapen al personaje
                 Column(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -256,19 +266,22 @@ fun ClockScreen(
                         onSave = { viewModel.finishAndSave() }
                     )
 
-                    if (isRunning) {
-                        AnimatedCharacter(
-                            character = character,
-                            size = 180.dp,
-                            pose = CharacterPose.Walk,
-                            hat = equippedHat,
-                            modifier = Modifier.offset(y = 20.dp) // Bajamos el personaje al pasto
-                        )
-                    }
-
                     FeedbackMessage(
                         message = mensajeResultado,
                         isError = state.isError
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                QuoteBanner(isRunning = isRunning)
+
+                if (!isRunning && seconds == 0) {
+                    ModeSelectionUI(
+                        currentMode = mode,
+                        targetTime = targetTime,
+                        onModeSelected = { viewModel.setMode(it) },
+                        onTimeSelected = { viewModel.setTargetTime(it) }
                     )
                 }
 

@@ -9,10 +9,10 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.PlayArrow
@@ -42,7 +42,6 @@ import com.example.focus.ui.component.LevelUpCelebration
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 
 
-import com.example.focus.viewmodel.ClockViewModel
 import com.example.focus.ui.component.LevelUpCelebration
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 
@@ -50,7 +49,6 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
-    clockViewModel: ClockViewModel = hiltViewModel(),
     onNavigateToAuthEntry: () -> Unit,
     onNavigateToClock: () -> Unit,
     onNavigateToRooms: () -> Unit, //temporal
@@ -63,8 +61,6 @@ fun HomeScreen(
     val progreso    by viewModel.progreso.collectAsState()
     val characterName by viewModel.character.collectAsState()
     val equippedHat by viewModel.equippedHat.collectAsState()
-    
-    val clockState by clockViewModel.state.collectAsState()
     
     var showLevelUp by remember { mutableStateOf(false) }
     var lastLevel by remember { mutableStateOf(nivel) }
@@ -203,84 +199,24 @@ fun HomeScreen(
                     }
                 }
 
-                // ── Visualización del Personaje (Ahora debajo de las estadísticas) ──
-                Box(
+                // ── Visualización del Personaje (Responsivo) ──
+                BoxWithConstraints(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(220.dp), // Ajustado ligeramente para no empujar tanto hacia abajo
+                        .heightIn(min = 200.dp, max = 350.dp),
                     contentAlignment = Alignment.Center
                 ) {
+                    val responsiveSize = (maxWidth * 0.7f).coerceAtMost(300.dp)
+                    
                     AnimatedCharacter(
                         character = GuildCharacter.fromName(characterName),
-                        size = 190.dp, // Ahora pasamos el tamaño directamente aquí
+                        size = responsiveSize,
                         pose = CharacterPose.Idle,
                         hat = equippedHat
                     )
                 }
 
                 Spacer(modifier = Modifier.height(10.dp))
-
-                // ── Misión activa ───────────────────────────────
-                GuildCard(
-                    modifier = Modifier.fillMaxWidth(),
-                    glow = clockState.isRunning,
-                    glowColor = AmberFlame,
-                    animatedBorder = clockState.isRunning
-                ) {
-                    Column {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            SectionLabel("MISIÓN EN CURSO", color = if (clockState.isRunning) AmberFlame else SteelSilver500)
-                            RarityBadge(
-                                text = if (clockState.isRunning) "ACTIVA" else "EN ESPERA",
-                                accent = if (clockState.isRunning) AmberFlame else SteelSilver500,
-                                fill = DungeonNoir500
-                            )
-                        }
-                        Spacer(modifier = Modifier.height(16.dp))
-                        
-                        if (clockState.isRunning) {
-                            val hours = clockState.timeInSeconds / 3600
-                            val minutes = (clockState.timeInSeconds % 3600) / 60
-                            val seconds = clockState.timeInSeconds % 60
-                            val timeStr = "%02d:%02d:%02d".format(hours, minutes, seconds)
-                            
-                            Column(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                Text(
-                                    text = timeStr,
-                                    style = MaterialTheme.typography.displayMedium,
-                                    color = AncientGold,
-                                    fontWeight = FontWeight.Black,
-                                    letterSpacing = 4.sp
-                                )
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Text(
-                                    text = "¡Sigue así, aventurero! La sabiduría te aguarda.",
-                                    style = MaterialTheme.typography.bodySmall.copy(fontStyle = FontStyle.Italic),
-                                    color = SteelSilver500
-                                )
-                            }
-                        } else {
-                            Text(
-                                text = "Sin misión en curso",
-                                style = MaterialTheme.typography.titleMedium,
-                                color = SteelSilver
-                            )
-                            Spacer(modifier = Modifier.height(2.dp))
-                            Text(
-                                text = "Ve a la pestaña MISIÓN para comenzar una sesión de estudio y ganar XP.",
-                                style = MaterialTheme.typography.bodySmall.copy(fontStyle = FontStyle.Italic),
-                                color = SteelSilver500
-                            )
-                        }
-                    }
-                }
 
                 // Espacio para que el FAB no tape la última card
                 Spacer(modifier = Modifier.height(96.dp))
