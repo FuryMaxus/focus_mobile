@@ -27,4 +27,5 @@ sealed interface AppRoute {
     @Serializable data object DMProfile : AppRoute
     @Serializable data object DMCreateRoom : AppRoute
     @Serializable data object Settings : AppRoute
+    @Serializable data object DashBoard: AppRoute
 }
