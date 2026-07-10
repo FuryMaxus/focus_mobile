@@ -83,7 +83,7 @@ fun HomeScreen(
                 title = {
                     Column {
                         Text(
-                            text = "FOCUS",
+                            text = "WardenClass",
                             style = MaterialTheme.typography.titleLarge,
                             color = AncientGold,
                             letterSpacing = 2.sp

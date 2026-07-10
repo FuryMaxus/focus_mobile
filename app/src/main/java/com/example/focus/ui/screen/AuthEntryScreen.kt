@@ -22,10 +22,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
@@ -196,19 +200,38 @@ private fun GuildCrest() {
 // ── Título con efecto grabado (capa de sombra + capa dorada) ─────
 @Composable
 private fun EngravedTitle(text: String) {
-    Box(contentAlignment = Alignment.Center) {
+    var textStyle by remember { mutableStateOf(androidx.compose.material3.MaterialTheme.typography.displayLarge.copy(letterSpacing = 6.sp)) }
+    var readyToDraw by remember { mutableStateOf(false) }
+
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier.drawWithContent {
+            if (readyToDraw) drawContent()
+        }
+    ) {
         // Sombra inferior (relieve hundido)
         Text(
             text = text,
-            style = MaterialTheme.typography.displayLarge.copy(letterSpacing = 6.sp),
+            style = textStyle,
             color = InkBlack.copy(alpha = 0.7f),
-            modifier = Modifier.offset(y = 2.dp)
+            modifier = Modifier.offset(y = 2.dp),
+            maxLines = 1,
+            softWrap = false,
+            onTextLayout = { textLayoutResult ->
+                if (textLayoutResult.didOverflowWidth) {
+                    textStyle = textStyle.copy(fontSize = textStyle.fontSize * 0.9f)
+                } else {
+                    readyToDraw = true
+                }
+            }
         )
         // Cara dorada
         Text(
             text = text,
-            style = MaterialTheme.typography.displayLarge.copy(letterSpacing = 6.sp),
-            color = AncientGold
+            style = textStyle,
+            color = AncientGold,
+            maxLines = 1,
+            softWrap = false
         )
     }
 }
