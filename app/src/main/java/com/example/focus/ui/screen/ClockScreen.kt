@@ -153,7 +153,7 @@ fun ClockScreen(
             TopAppBar(
                 title = {
                     Column {
-                        Text("Aventura Focus", style = MaterialTheme.typography.titleLarge, color = AncientGold)
+                        Text("WardenClass", style = MaterialTheme.typography.titleLarge, color = AncientGold)
                         Text(if (mode == TimerMode.TIME_TRIAL) "CONTRARRELOJ" else "EXPLORACIÓN LIBRE", style = MaterialTheme.typography.labelSmall, color = dynamicGlowColor, fontWeight = FontWeight.Bold)
                     }
                 },

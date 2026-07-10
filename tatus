@@ -1,0 +1,19 @@
+*   [33m2086101[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m, [m[1;31morigin/HEAD[m[33m)[m Merge pull request #33 from FuryMaxus/top-and-graph
+[31m|[m[32m\[m  
+[31m|[m * [33m391d583[m A
+[31m|[m[31m/[m  
+* [33mcb82da9[m fix added variable parameter activity time
+*   [33ma335c73[m Merge pull request #32 from FuryMaxus/ajustes-errores-dto
+[33m|[m[34m\[m  
+[33m|[m *   [33mcb1f32e[m[33m ([m[1;31morigin/ajustes-errores-dto[m[33m, [m[1;32majustes-errores-dto[m[33m)[m merge: resolve conflict combining error handling and room stats in DMPanelViewModel
+[33m|[m [35m|[m[33m\[m  
+[33m|[m [35m|[m[33m/[m  
+[33m|[m[33m/[m[35m|[m   
+* [35m|[m   [33m4d57765[m Merge pull request #31 from FuryMaxus/Music-Settings
+[1;31m|[m[1;32m\[m [35m\[m  
+[1;31m|[m * [35m|[m [33m97d758f[m[33m ([m[1;31morigin/Music-Settings[m[33m)[m Parallax - Settings - Hat adjustment
+[1;31m|[m * [35m|[m [33maedd95b[m Parallax - Settings - Hat adjustment
+* [1;32m|[m [35m|[m   [33m1ab6980[m Merge pull request #30 from FuryMaxus/revert-25-revert-20-add-time-range-option-for-rooms-in-the-screens
+[1;33m|[m[1;34m\[m [1;32m\[m [35m\[m  
+[1;33m|[m * [1;32m|[m [35m|[m [33m706b5b2[m Revert "Revert "Add time range option for rooms in the screens""
+[1;33m|[m[1;33m/[m [1;32m/[m [35m/[m  
