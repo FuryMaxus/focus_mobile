@@ -1,6 +1,8 @@
 package com.example.focus.repository
 
+import com.example.focus.data.remote.GraphItemDto
 import com.example.focus.data.remote.JoinRoomPayload
+import com.example.focus.data.remote.LeaderboardItemDto
 import com.example.focus.data.remote.MemberResponseDto
 import com.example.focus.data.remote.RoomCreatePayload
 import com.example.focus.data.remote.RoomResponseDto
@@ -72,6 +74,24 @@ class RoomRepository @Inject constructor(
     suspend fun fetchRoomStats(roomId: String): Result<com.example.focus.data.remote.SessionReportResponseDto> {
         return try {
             Result.success(apiService.getRoomStats(roomId))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun fetchRoomLeaderboard(roomId: String): Result<List<LeaderboardItemDto>> {
+        return try {
+            val response = apiService.getRoomLeaderboard(roomId)
+            Result.success(response)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun fetchRoomGraph(roomId: String, startDate: String, endDate: String): Result<List<GraphItemDto>> {
+        return try {
+            val response = apiService.getRoomGraph(roomId, startDate, endDate)
+            Result.success(response)
         } catch (e: Exception) {
             Result.failure(e)
         }

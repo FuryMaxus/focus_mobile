@@ -23,11 +23,9 @@ import androidx.navigation.NavHostController
 import com.example.focus.network.AuthEvent
 import com.example.focus.ui.screen.AuthEntryScreen
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Home
+
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.Backpack
@@ -39,27 +37,20 @@ import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.example.focus.ui.theme.AncientGold
 import com.example.focus.ui.theme.DungeonNoir700
-import com.example.focus.ui.theme.InkBlack
 import com.example.focus.ui.screen.RoomsScreen
 import com.example.focus.ui.screen.InventoryScreen
 import com.example.focus.ui.screen.DMCreateRoomScreen
 import com.example.focus.ui.screen.DMPanelScreen
 import com.example.focus.ui.screen.CharacterDetailScreen
 import com.example.focus.ui.screen.SettingsScreen
+import com.example.focus.ui.screen.DashboardScreen
 import com.example.focus.ui.theme.animatedGoldBorder
 import com.example.focus.ui.theme.guildGlow
-import com.example.focus.ui.theme.ShieldShape
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Alignment
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Shield
-import androidx.compose.material.icons.filled.Backpack
-import androidx.compose.material.icons.filled.Castle
-import androidx.compose.material.icons.filled.HistoryEdu
-import androidx.compose.material.icons.filled.MilitaryTech
+import androidx.compose.material.icons.filled.BarChart
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -103,6 +94,7 @@ fun MainScreen() {
                         listOf(
                             Triple(AppRoute.Home, Icons.Filled.HistoryEdu, "Inicio"),
                             Triple(AppRoute.DMPanel, Icons.Filled.Shield, "Gremios"),
+                            Triple(AppRoute.DashBoard, Icons.Filled.BarChart, "Dashboard"),
                             Triple(AppRoute.DMProfile, Icons.Filled.Person, "Perfil")
                         )
                     } else {
@@ -117,7 +109,6 @@ fun MainScreen() {
                     items.forEach { (route, icon, label) ->
                         val selected = currentDestination?.hierarchy?.any { it.hasRoute(route::class) } == true
                         
-                        // Si estamos en la pantalla del reloj, ocultamos las etiquetas para que sea más limpio
                         val showLabel = !isClockScreen
 
                         NavigationBarItem(
@@ -171,7 +162,7 @@ fun MainScreen() {
             startDestination = startRoute,
             modifier = Modifier.padding(innerPadding)
         ) {
-            // ... (dentro de NavHost)
+
 
             composable<AppRoute.Menu> {
                 AuthEntryScreen(
@@ -303,6 +294,11 @@ fun MainScreen() {
                     onNavigateBack = {
                         mainViewModel.navigateBack()
                     }
+                )
+            }
+
+            composable<AppRoute.DashBoard> {
+                DashboardScreen(
                 )
             }
         }

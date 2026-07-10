@@ -1,6 +1,8 @@
 package com.example.focus.network
 
+import com.example.focus.data.remote.GraphItemDto
 import com.example.focus.data.remote.JoinRoomPayload
+import com.example.focus.data.remote.LeaderboardItemDto
 import com.example.focus.data.remote.LoginPayload
 import com.example.focus.data.remote.MemberResponseDto
 import com.example.focus.data.remote.RegisterPayload
@@ -14,6 +16,8 @@ import com.example.focus.data.remote.UserStatsDto
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface ApiService {
     @POST("api/v1/auth/login")
@@ -51,4 +55,17 @@ interface ApiService {
 
     @GET("api/v1/sessions/reports")
     suspend fun getRoomStats(@retrofit2.http.Query("room_id") roomId: String): com.example.focus.data.remote.SessionReportResponseDto
+
+    @GET("/api/v1/sessions/{room_id}/leaderboard")
+    suspend fun getRoomLeaderboard(
+        @Path("room_id") roomId: String,
+        @Query("limit") limit: Int = 10
+    ): List<LeaderboardItemDto>
+
+    @GET("/api/v1/sessions/{room_id}/graph")
+    suspend fun getRoomGraph(
+        @Path("room_id") roomId: String,
+        @Query("start_date") startDate: String,
+        @Query("end_date") endDate: String
+    ): List<GraphItemDto>
 }
