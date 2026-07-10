@@ -6,6 +6,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Brush
@@ -58,12 +59,11 @@ fun PantallaJuego(
             InfiniteParallaxLayer(layer, isRunning = true)
         }
 
-        // Posicionamos al personaje apoyado sobre el suelo (Layer 9)
-        // El suelo suele estar en el cuarto inferior de la pantalla
+        // Posicionamos al personaje apoyado sobre el suelo (Layer 9) de forma responsiva
         Box(
             modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(bottom = 60.dp) // Ajuste para que pise el camino
+                .fillMaxSize(),
+            contentAlignment = BiasAlignment(0f, 0.92f) // Usamos BiasAlignment para que sea responsivo al fondo estirado
         ) {
             PersonajeAnimadoCaminando(imagenRes = characterRes)
         }

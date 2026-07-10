@@ -15,6 +15,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
@@ -194,6 +195,21 @@ fun ClockScreen(
                 dynamicColor = dynamicGlowColor
             )
 
+            // Personaje posicionado de forma responsiva respecto al fondo (pasto)
+            if (isRunning) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = BiasAlignment(0f, 0.92f) // Ajuste para que "pise" el suelo del fondo parallax
+                ) {
+                    AnimatedCharacter(
+                        character = character,
+                        size = 180.dp,
+                        pose = CharacterPose.Walk,
+                        hat = equippedHat
+                    )
+                }
+            }
+
             if (isRunning) {
                 // Partículas que flotan por toda la pantalla
                 FullScreenEpicParticles(intensity = intensity, color = dynamicGlowColor)
@@ -256,20 +272,14 @@ fun ClockScreen(
                         onSave = { viewModel.finishAndSave() }
                     )
 
-                    if (isRunning) {
-                        AnimatedCharacter(
-                            character = character,
-                            size = 180.dp,
-                            pose = CharacterPose.Walk,
-                            hat = equippedHat,
-                            modifier = Modifier.offset(y = 20.dp) // Bajamos el personaje al pasto
-                        )
-                    }
-
                     FeedbackMessage(
                         message = mensajeResultado,
                         isError = state.isError
                     )
+
+                    if (isRunning) {
+                        Spacer(modifier = Modifier.height(100.dp)) // Reserva espacio para el personaje que ahora flota detrás
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))

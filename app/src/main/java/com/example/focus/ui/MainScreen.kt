@@ -29,6 +29,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.Backpack
 import androidx.compose.material.icons.filled.Castle
@@ -101,7 +102,7 @@ fun MainScreen() {
                 ) {
                     val items = if (role == "dm") {
                         listOf(
-                            Triple(AppRoute.Home, Icons.Filled.HistoryEdu, "Inicio"),
+                            Triple(AppRoute.Home, Icons.Filled.Home, "Inicio"),
                             Triple(AppRoute.DMPanel, Icons.Filled.Shield, "Gremios"),
                             Triple(AppRoute.DMProfile, Icons.Filled.Person, "Perfil")
                         )
@@ -123,12 +124,21 @@ fun MainScreen() {
                         NavigationBarItem(
                             selected = selected,
                             onClick = {
-                                navController.navigate(route) {
-                                    popUpTo(navController.graph.findStartDestination().id) {
-                                        saveState = true
+                                if (route == AppRoute.Home) {
+                                    navController.navigate(AppRoute.Home) {
+                                        popUpTo(navController.graph.findStartDestination().id) {
+                                            inclusive = false
+                                        }
+                                        launchSingleTop = true
                                     }
-                                    launchSingleTop = true
-                                    restoreState = true
+                                } else {
+                                    navController.navigate(route) {
+                                        popUpTo(navController.graph.findStartDestination().id) {
+                                            saveState = true
+                                        }
+                                        launchSingleTop = true
+                                        restoreState = true
+                                    }
                                 }
                             },
                             icon = { 
@@ -198,7 +208,7 @@ fun MainScreen() {
                     },
                     onNavigateDM = {
                         mainViewModel.navigateTo(
-                            destination = AppRoute.DMPanel,
+                            destination = AppRoute.Home,
                             popUpTo = AppRoute.Menu,
                             inclusive = true
                         )
