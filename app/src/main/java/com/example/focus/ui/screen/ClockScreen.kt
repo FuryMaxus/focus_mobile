@@ -221,13 +221,15 @@ fun ClockScreen(
                     .padding(paddingValues) // Aplicamos el padding aquí dentro para que el TopBar sea transparente sobre el fondo
                     .padding(horizontal = 24.dp, vertical = 16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.SpaceBetween
+                verticalArrangement = Arrangement.Top // Cambiado a Top para subir el reloj
             ) {
                 StatusBadge(isRunning = isRunning, mode = mode)
 
+                Spacer(modifier = Modifier.height(16.dp)) // Espacio tras el badge
+
                 ClockDisplay(
                     modifier = Modifier
-                        .weight(1f)
+                        .heightIn(max = 300.dp) // Limitamos altura para que no empuje todo
                         .graphicsLayer{
                             val isShaking = isRunning && intensity > 0.2f
                             val factor = 1f + (intensity * 10f)
@@ -250,17 +252,9 @@ fun ClockScreen(
                     targetTime = targetTime
                 )
 
-                QuoteBanner(isRunning = isRunning)
+                Spacer(modifier = Modifier.height(20.dp)) // Espacio tras el reloj
 
-                if (!isRunning && seconds == 0) {
-                    ModeSelectionUI(
-                        currentMode = mode,
-                        targetTime = targetTime,
-                        onModeSelected = { viewModel.setMode(it) },
-                        onTimeSelected = { viewModel.setTargetTime(it) }
-                    )
-                }
-
+                // Movemos los botones de acción aquí para que estén más arriba y no tapen al personaje
                 Column(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -276,10 +270,19 @@ fun ClockScreen(
                         message = mensajeResultado,
                         isError = state.isError
                     )
+                }
 
-                    if (isRunning) {
-                        Spacer(modifier = Modifier.height(100.dp)) // Reserva espacio para el personaje que ahora flota detrás
-                    }
+                Spacer(modifier = Modifier.height(16.dp))
+
+                QuoteBanner(isRunning = isRunning)
+
+                if (!isRunning && seconds == 0) {
+                    ModeSelectionUI(
+                        currentMode = mode,
+                        targetTime = targetTime,
+                        onModeSelected = { viewModel.setMode(it) },
+                        onTimeSelected = { viewModel.setTargetTime(it) }
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
